@@ -1,0 +1,20 @@
+# Dependencies / build
+node_modules/
+dist/
+
+# Secrets / local env
+.env
+.env.local
+.env.*.local
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
