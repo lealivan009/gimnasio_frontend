@@ -49,10 +49,13 @@ html,
 body,
 #root {
   min-height: 100%;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 body {
   margin: 0;
+  overflow-x: clip;
   font-family: var(--font);
   background:
     radial-gradient(1100px 520px at 8% -8%, var(--glow), transparent 55%),
@@ -714,6 +717,9 @@ textarea:focus {
 
 .app-shell {
   min-height: 100vh;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 .app-nav {
@@ -1033,6 +1039,7 @@ textarea:focus {
 
 .app-main {
   max-width: 1080px;
+  min-width: 0;
   margin: 0 auto;
   padding: 28px 20px 32px;
 }
@@ -1374,6 +1381,8 @@ textarea:focus {
 
 .session-card {
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .meta {
@@ -1546,45 +1555,8 @@ textarea:focus {
     grid-template-columns: 1fr;
   }
 
-  .heat-cell {
-    min-height: 36px;
-  }
-
   .session-card {
     padding: 18px 14px;
-  }
-
-  .calendar-head {
-    display: grid;
-    justify-items: start;
-  }
-
-  .calendar-nav {
-    width: 100%;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-areas:
-      "month month"
-      "prev next";
-    gap: 8px;
-  }
-
-  .calendar-month {
-    grid-area: month;
-    min-width: 0;
-    text-align: center;
-  }
-
-  .calendar-prev {
-    grid-area: prev;
-  }
-
-  .calendar-next {
-    grid-area: next;
-  }
-
-  .calendar-nav .btn-ghost {
-    width: 100%;
   }
 }
 
@@ -1722,7 +1694,7 @@ textarea {
 .stat-grid,
 .gym-charts {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
   gap: 14px;
   margin: 18px 0;
 }
@@ -1781,6 +1753,7 @@ textarea {
   gap: 6px;
   width: 100%;
   min-width: 0;
+  max-width: 100%;
 }
 
 .heat-weekdays {
@@ -1792,21 +1765,30 @@ textarea {
 
 .calendar-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   margin: 8px 0 14px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.calendar-head h2 {
+  margin: 0;
 }
 
 .calendar-nav {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   min-width: 0;
+  max-width: 100%;
 }
 
 .calendar-month {
-  min-width: 8.5rem;
+  min-width: 0;
   text-align: center;
 }
 
@@ -1895,4 +1877,52 @@ textarea {
 
 .day-choice button strong {
   display: block;
+}
+
+@media (max-width: 900px) {
+  .form-grid.triple,
+  .gym-charts,
+  .stat-grid,
+  .set-form {
+    grid-template-columns: 1fr;
+  }
+
+  .heat-cell {
+    min-height: 36px;
+  }
+
+  .calendar-head {
+    display: grid;
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: stretch;
+  }
+
+  .calendar-nav {
+    width: 100%;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "month month"
+      "prev next";
+    gap: 8px;
+  }
+
+  .calendar-month {
+    grid-area: month;
+    text-align: center;
+  }
+
+  .calendar-prev {
+    grid-area: prev;
+  }
+
+  .calendar-next {
+    grid-area: next;
+  }
+
+  .calendar-nav .btn-ghost {
+    width: 100%;
+  }
 }
