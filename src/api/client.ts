@@ -75,14 +75,12 @@ export class ApiClient {
     email: string,
     password: string,
     profile: ProfileFields = {}
-  ): Promise<AuthResponse> {
-    const auth = await this.request<AuthResponse>("/api/auth/register", {
+  ): Promise<{ message: string }> {
+    return this.request<{ message: string }>("/api/auth/register", {
       method: "POST",
       auth: false,
       body: { firstName, lastName, email, password, ...profile },
     });
-    this.setSession(auth);
-    return auth;
   }
 
   async login(email: string, password: string): Promise<AuthResponse> {
@@ -443,6 +441,22 @@ export class ApiClient {
     return this.request<Attendance>(`/api/asistencia/egreso?studentId=${encodeURIComponent(studentId)}`, {
       method: "POST",
     });
+  }
+
+  checkIn() {
+    return this.request<Attendance>("/api/asistencia/ingreso", { method: "POST" });
+  }
+
+  checkOut() {
+    return this.request<Attendance>("/api/asistencia/egreso", { method: "POST" });
+  }
+
+  listPending() {
+    return this.request<User[]>("/api/users/pendientes");
+  }
+
+  approveUser(id: string) {
+    return this.request<User>(`/api/users/${encodeURIComponent(id)}/aprobar`, { method: "POST", body: {} });
   }
 
   statsSummary(studentId?: string) {

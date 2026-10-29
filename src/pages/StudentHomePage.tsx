@@ -194,12 +194,30 @@ export function StudentHomePage() {
       <section className="session-card">
         <h2>Asistencia de hoy</h2>
         {attendance?.checkInTime && !attendance.checkOutTime ? (
-          <p className="lede">Estás adentro. El profesor marcó tu presente.</p>
+          <p className="lede">Estás adentro.</p>
         ) : attendance?.checkInTime ? (
           <p className="lede">Hoy tuviste presente.</p>
         ) : (
-          <p className="lede">El profesor todavía no marcó tu presente.</p>
+          <p className="lede">Todavía no hay presente de hoy. Podés marcarlo vos, o lo marca el profesor.</p>
         )}
+        <div className="form-actions">
+          <button
+            type="button"
+            className="btn-primary btn-inline"
+            disabled={busyId === "in" || Boolean(attendance && !attendance.checkOutTime)}
+            onClick={() => runAction("in", async () => { await api.checkIn(); setNotice("Ingreso registrado"); })}
+          >
+            Registrar ingreso
+          </button>
+          <button
+            type="button"
+            className="btn-ghost"
+            disabled={busyId === "out" || !attendance || Boolean(attendance.checkOutTime)}
+            onClick={() => runAction("out", async () => { await api.checkOut(); setNotice("Salida registrada"); })}
+          >
+            Registrar salida
+          </button>
+        </div>
       </section>
 
       {mode !== "FREE_ACCESS" ? (

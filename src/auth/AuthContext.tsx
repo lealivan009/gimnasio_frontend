@@ -61,8 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session.user);
       },
       register: async (firstName, lastName, email, password, profile) => {
-        const session = await api.register(firstName, lastName, email, password, profile);
-        setUser(session.user);
+        await api.register(firstName, lastName, email, password, profile);
       },
       updateProfile: async (input) => {
         const next = await api.updateProfile(input);

@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { emptyProfile, profilePayload } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import { AuthForm, Field } from "../components/AuthForm";
@@ -9,7 +9,6 @@ import { PasswordHint } from "../components/PasswordHint";
 
 export function RegisterPage() {
   const { register } = useAuth();
-  const navigate = useNavigate();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -18,6 +17,7 @@ export function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [done, setDone] = useState(false);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
@@ -25,7 +25,7 @@ export function RegisterPage() {
     setSubmitting(true);
     try {
       await register(firstName.trim(), lastName.trim(), email.trim(), password, profilePayload(profile));
-      navigate("/app", { replace: true });
+      setDone(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo crear la cuenta");
     } finally {
@@ -35,10 +35,24 @@ export function RegisterPage() {
 
   return (
     <AuthLayout>
+      {done ? (
+        <AuthForm
+          wide
+          title="Cuenta creada"
+          subtitle="Cuando el profesor o el administrador la apruebe, vas a poder entrar."
+          onSubmit={(event) => event.preventDefault()}
+          error={null}
+          submitLabel="Listo"
+          submitting={false}
+          footer={<Link to="/login">Ir a iniciar sesión</Link>}
+        >
+          <p className="lede">Te avisamos en esta pantalla. No hace falta que vuelvas a registrarte.</p>
+        </AuthForm>
+      ) : (
       <AuthForm
         wide
         title="Crear cuenta"
-        subtitle="Registrate para obtener una sesión lista para usar en cualquier producto."
+        subtitle="La cuenta queda pendiente hasta que el profesor o el administrador la apruebe."
         error={error}
         submitting={submitting}
         submitLabel="Registrarme"
@@ -83,6 +97,7 @@ export function RegisterPage() {
         <p className="eyebrow profile-kicker">Datos personales</p>
         <ProfileFields idPrefix="register" values={profile} onChange={setProfile} />
       </AuthForm>
+      )}
     </AuthLayout>
   );
 }

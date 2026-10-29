@@ -49,6 +49,7 @@ export interface User extends ProfileFields {
   lockedUntil?: string | null;
   createdAt: string;
   lastLoginAt: string | null;
+  approved?: boolean;
 }
 
 export interface ProfileForm {

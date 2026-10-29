@@ -277,9 +277,13 @@ export function UsersPage() {
                         <td>{user.phone || "—"}</td>
                         <td>{roleLabel(user.role)}</td>
                         <td>
-                          <span className={user.enabled === false ? "pill off" : "pill on"}>
-                            {user.enabled === false ? "Inactivo" : "Activo"}
-                          </span>
+                          {user.approved === false ? (
+                            <span className="pill off">Pendiente</span>
+                          ) : (
+                            <span className={user.enabled === false ? "pill off" : "pill on"}>
+                              {user.enabled === false ? "Inactivo" : "Activo"}
+                            </span>
+                          )}
                         </td>
                         <td>{formatDate(user.lastLoginAt)}</td>
                         <td className="actions">

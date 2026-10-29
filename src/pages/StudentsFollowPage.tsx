@@ -75,7 +75,7 @@ export function StudentsFollowPage() {
         <p className="eyebrow">Seguimiento</p>
         <h1>Alumnos</h1>
         <p className="lede">
-          Marcá el presente cuando el alumno entra y la salida cuando se va. Así ves cuánta gente está en el gimnasio.
+          El alumno puede marcar su presente. Si se olvida, marcalo vos cuando entra y la salida cuando se va.
         </p>
         {notice ? <p className="alert ok">{notice}</p> : null}
       </section>

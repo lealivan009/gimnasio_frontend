@@ -5,6 +5,7 @@ import { ProtectedRoute } from "./auth/ProtectedRoute";
 import { RegisterRoute } from "./auth/RegisterRoute";
 import { StaffRoute } from "./auth/StaffRoute";
 import { StudentRoute } from "./auth/StudentRoute";
+import { useAuth } from "./auth/AuthContext";
 import { AppShell } from "./components/AppShell";
 import { AccountPage } from "./pages/AccountPage";
 import { ExercisesPage } from "./pages/ExercisesPage";
@@ -22,6 +23,7 @@ import { SchedulesPage } from "./pages/SchedulesPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { StudentHomePage } from "./pages/StudentHomePage";
 import { StudentsFollowPage } from "./pages/StudentsFollowPage";
+import { PendingAccountsPage } from "./pages/PendingAccountsPage";
 import { TimerPage } from "./pages/TimerPage";
 import { UserDetailPage } from "./pages/UserDetailPage";
 import { UsersPage } from "./pages/UsersPage";
@@ -43,7 +45,7 @@ export function App() {
           <Route path="/app" element={<HomePage />} />
           <Route path="/app/profile" element={<ProfilePage />} />
           <Route path="/app/account" element={<AccountPage />} />
-          <Route path="/cronometro" element={<TimerPage />} />
+          <Route path="/cronometro" element={<TimerGate />} />
           <Route element={<AdminRoute />}>
             <Route path="/app/users" element={<UsersPage />} />
             <Route path="/app/users/:id" element={<UserDetailPage />} />
@@ -54,6 +56,7 @@ export function App() {
             <Route path="/admin/rutinas" element={<RoutinesPage />} />
             <Route path="/admin/horarios" element={<SchedulesPage />} />
             <Route path="/admin/alumnos" element={<StudentsFollowPage />} />
+            <Route path="/admin/pendientes" element={<PendingAccountsPage />} />
             <Route path="/admin/progreso" element={<ProgressPage />} />
           </Route>
           <Route element={<StudentRoute />}>
@@ -66,4 +69,12 @@ export function App() {
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
+}
+
+function TimerGate() {
+  const { user } = useAuth();
+  if (user?.role === "ADMIN") {
+    return <Navigate to="/app" replace />;
+  }
+  return <TimerPage />;
 }
