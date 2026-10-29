@@ -59,8 +59,9 @@ export function StudentHomePage() {
   const [selectedDate, setSelectedDate] = useState<string | null>(today);
   const [choosingDay, setChoosingDay] = useState(false);
   const [loggingDay, setLoggingDay] = useState<number | null>(null);
-  const [logDate, setLogDate] = useState(today);
   const oldestLogDate = shiftIso(today, -7);
+  const logDate = selectedDate ?? today;
+  const canLogDate = logDate >= oldestLogDate && logDate <= today;
 
   async function reload() {
     const config = await api.getGymConfig();
@@ -323,10 +324,20 @@ export function StudentHomePage() {
           selectedDate={selectedDate}
           onSelect={(date) => {
             setSelectedDate(date);
-            setChoosingDay(false);
-            setLoggingDay(null);
+            setError(null);
+            if (date < oldestLogDate || date > today) {
+              setLoggingDay(null);
+              setChoosingDay(false);
+            }
           }}
         />
+        <p className="hint left">
+          {selectedDate && selectedDate > today
+            ? "Ese día todavía no llegó."
+            : selectedDate && selectedDate < oldestLogDate
+              ? "Ese día queda afuera de los 7 días. Podés verlo, pero no cargarlo."
+              : "Tocá un día del calendario para elegir la fecha. Podés cargar hasta 7 días hacia atrás."}
+        </p>
 
         {active?.routine && active.assignment ? (
           <TrainingDay
@@ -344,11 +355,17 @@ export function StudentHomePage() {
             onChoose={(dayNumber) => {
               setLoggingDay(dayNumber);
               setChoosingDay(false);
-              setSelectedDate(today);
             }}
             onStart={() => {
+              if (!canLogDate) {
+                setError(
+                  logDate > today
+                    ? "No podés cargar un día que todavía no llegó."
+                    : "Solo podés cargar un entrenamiento de los últimos 7 días."
+                );
+                return;
+              }
               const grouped = routineDays(active.routine?.exercises ?? []);
-              setSelectedDate(today);
               if (grouped.length <= 1) {
                 setLoggingDay(grouped[0]?.dayNumber ?? 1);
                 setChoosingDay(false);
@@ -364,8 +381,6 @@ export function StudentHomePage() {
             onSkipRest={() => setRest(null)}
             onLog={onLog}
             logDate={logDate}
-            oldestLogDate={oldestLogDate}
-            onLogDate={setLogDate}
           />
         ) : null}
       </section>
@@ -391,8 +406,6 @@ function TrainingDay({
   onSkipRest,
   onLog,
   logDate,
-  oldestLogDate,
-  onLogDate,
 }: {
   routineExercises: RoutineExercise[];
   logs: WorkoutLog[];
@@ -411,8 +424,6 @@ function TrainingDay({
   onSkipRest: () => void;
   onLog: (event: FormEvent, exerciseId: string, restSeconds: number, exerciseName: string) => Promise<void>;
   logDate: string;
-  oldestLogDate: string;
-  onLogDate: (value: string) => void;
 }) {
   const days = routineDays(routineExercises);
   const openDay = days.find((day) => day.dayNumber === loggingDay) ?? null;
@@ -442,7 +453,7 @@ function TrainingDay({
       </div>
 
       {choosingDay ? (
-        <div className="day-choice">
+        <div className="day-choice training-split">
           <p className="lede">¿Qué día estás haciendo? Podés hacer el día 1 un lunes y el día 3 un martes.</p>
           {days.map((day) => (
             <button type="button" key={day.dayNumber} onClick={() => onChoose(day.dayNumber)}>
@@ -454,19 +465,8 @@ function TrainingDay({
 
       {openDay ? (
         <>
-          <h3>{sessionName(days, openDay.dayNumber)}</h3>
-          <label className="field">
-            <span className="field-label">Fecha del entrenamiento</span>
-            <input
-              type="date"
-              min={oldestLogDate}
-              max={today}
-              value={logDate}
-              onChange={(event) => onLogDate(event.target.value)}
-              required
-            />
-          </label>
-          <p className="hint left">Podés cargar hasta 7 días hacia atrás. La rutina tiene que haber estado vigente ese día.</p>
+          <h3 className="training-day-title">{sessionName(days, openDay.dayNumber)}</h3>
+          <p className="lede">Cargando el {formatDate(logDate)}.</p>
           <p className="hint left">
             Esfuerzo es opcional, del 1 al 10: 1 es muy fácil y 10 es que no podrías hacer otra repetición.
           </p>

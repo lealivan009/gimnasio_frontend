@@ -1754,6 +1754,13 @@ textarea {
   width: 100%;
   min-width: 0;
   max-width: 100%;
+  contain: inline-size;
+}
+
+.heat-weekdays > *,
+.heat-grid > * {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .heat-weekdays {
@@ -1794,6 +1801,7 @@ textarea {
 
 .heat-cell {
   min-width: 0;
+  max-width: 100%;
   min-height: 52px;
   display: flex;
   flex-direction: column;
@@ -1806,8 +1814,15 @@ textarea {
   overflow: hidden;
 }
 
+.heat-cell > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
 .heat-cell.pick {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   border: 0;
   padding: 4px 2px;
   font: inherit;
@@ -1820,6 +1835,9 @@ textarea {
 }
 
 .heat-label {
+  display: block;
+  width: 100%;
+  min-width: 0;
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1879,6 +1897,17 @@ textarea {
   display: block;
 }
 
+.training-split,
+.session-card h3.training-day-title {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.session-card h3.training-day-title {
+  margin-bottom: 8px;
+}
+
 @media (max-width: 900px) {
   .form-grid.triple,
   .gym-charts,
@@ -1889,6 +1918,17 @@ textarea {
 
   .heat-cell {
     min-height: 36px;
+    padding: 2px;
+    font-size: 12px;
+  }
+
+  .heat-weekdays,
+  .heat-grid {
+    gap: 4px;
+  }
+
+  .heat-label {
+    display: none;
   }
 
   .calendar-head {
