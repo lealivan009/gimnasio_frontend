@@ -515,6 +515,8 @@ a:hover {
   flex-direction: column;
   gap: 8px;
   margin-bottom: 16px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .field-label {
@@ -536,6 +538,8 @@ a:hover {
 input,
 select {
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
   border: 1px solid var(--line);
   background: var(--input-bg);
   color: var(--text);
@@ -543,6 +547,25 @@ select {
   padding: 13px 14px;
   font: inherit;
   outline: none;
+}
+
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+input[type="month"],
+input[type="week"] {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-inline-size: 0;
+}
+
+input[type="date"]::-webkit-datetime-edit,
+input[type="time"]::-webkit-datetime-edit,
+input[type="datetime-local"]::-webkit-datetime-edit {
+  min-width: 0;
+  padding: 0;
 }
 
 select {
@@ -1562,6 +1585,8 @@ textarea:focus {
 
 textarea {
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
   border: 1px solid var(--line);
   background: var(--input-bg);
   color: var(--text);
@@ -1619,9 +1644,14 @@ textarea {
 .routine-row-head,
 .routine-card-head {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   gap: 12px;
   align-items: flex-start;
+}
+
+.routine-card-head strong {
+  min-width: 0;
 }
 
 .routine-card-head .actions {
@@ -1666,8 +1696,18 @@ textarea {
 .set-form label {
   display: grid;
   gap: 6px;
+  min-width: 0;
+  max-width: 100%;
   color: var(--muted);
   font-size: 13px;
+}
+
+a.btn-primary,
+a.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 }
 
 .rest-timer {
@@ -1914,6 +1954,14 @@ textarea {
   .stat-grid,
   .set-form {
     grid-template-columns: 1fr;
+  }
+
+  .session-card,
+  .routine-card,
+  .day-block,
+  .field {
+    min-width: 0;
+    max-width: 100%;
   }
 
   .heat-cell {

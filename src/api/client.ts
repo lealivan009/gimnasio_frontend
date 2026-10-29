@@ -327,6 +327,10 @@ export class ApiClient {
     return this.request<Routine[]>("/api/rutinas");
   }
 
+  getRoutine(id: string) {
+    return this.request<Routine>(`/api/rutinas/${encodeURIComponent(id)}`);
+  }
+
   getActiveRoutine() {
     return this.request<ActiveRoutine>("/api/rutinas/activa");
   }

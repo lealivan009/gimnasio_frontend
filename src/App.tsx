@@ -13,6 +13,7 @@ import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 import { HomePage } from "./pages/HomePage";
 import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
+import { CreateRoutinePage } from "./pages/CreateRoutinePage";
 import { MyRoutinesPage } from "./pages/MyRoutinesPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { ProgressPage } from "./pages/ProgressPage";
@@ -62,6 +63,7 @@ export function App() {
           <Route element={<StudentRoute />}>
             <Route path="/alumno/inicio" element={<StudentHomePage />} />
             <Route path="/alumno/mis-rutinas" element={<MyRoutinesPage />} />
+            <Route path="/alumno/mis-rutinas/nueva" element={<CreateRoutinePage />} />
             <Route path="/alumno/progreso" element={<ProgressPage />} />
           </Route>
         </Route>
