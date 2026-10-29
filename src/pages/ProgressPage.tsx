@@ -130,10 +130,11 @@ export function ProgressPage() {
 
   return (
     <>
-      <section className="session-card">
-        <p className="eyebrow">Progreso</p>
-        <h1>{staff ? "Progreso del alumno" : "Tu progreso"}</h1>
-        <p className="lede">Peso máximo, volumen, asistencia y racha semanal.</p>
+      <section className="session-card home-brief">
+        <div>
+          <p className="eyebrow">Progreso</p>
+          <h1>{staff ? "Progreso del alumno" : "Tu progreso"}</h1>
+        </div>
         {staff ? (
           <label className="field">
             <span className="field-label">Alumno</span>
@@ -157,30 +158,28 @@ export function ProgressPage() {
             {selectedStudent.firstName} {selectedStudent.lastName}
           </p>
         ) : null}
+        {error ? <p className="alert">{error}</p> : null}
+        {loading && !summary ? <p className="lede">Cargando…</p> : null}
+        {summary ? (
+          <div className="progress-facts">
+            <div>
+              <p className="eyebrow">Racha</p>
+              <strong>{summary.weeklyStreak}</strong>
+              <p>semanas</p>
+            </div>
+            <div>
+              <p className="eyebrow">Esta semana</p>
+              <strong>{summary.workoutsThisWeek}</strong>
+              <p>series</p>
+            </div>
+            <div>
+              <p className="eyebrow">Asistencia</p>
+              <strong>{summary.attendanceDaysThisMonth}</strong>
+              <p>días del mes</p>
+            </div>
+          </div>
+        ) : null}
       </section>
-
-      {error ? <p className="alert">{error}</p> : null}
-      {loading && !summary ? <p className="lede">Cargando…</p> : null}
-
-      {summary ? (
-        <section className="stat-grid">
-          <article className="session-card stat-card">
-            <p className="eyebrow">Racha</p>
-            <strong>{summary.weeklyStreak}</strong>
-            <p>semanas seguidas entrenando</p>
-          </article>
-          <article className="session-card stat-card">
-            <p className="eyebrow">Esta semana</p>
-            <strong>{summary.workoutsThisWeek}</strong>
-            <p>series registradas</p>
-          </article>
-          <article className="session-card stat-card">
-            <p className="eyebrow">Asistencia</p>
-            <strong>{summary.attendanceDaysThisMonth}</strong>
-            <p>días en el mes</p>
-          </article>
-        </section>
-      ) : null}
 
       <section className="session-card">
         <h2>Peso corporal</h2>
