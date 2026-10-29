@@ -185,9 +185,9 @@ export function SchedulesPage() {
     <>
       <section className="session-card">
         <p className="eyebrow">Gimnasio</p>
-        <h1>Horarios y modalidad</h1>
+        <h1>Plataforma</h1>
         <p className="lede">
-          Definí si el gimnasio funciona con acceso libre, con reserva de clases o en modo híbrido.
+          Nombre, descripción, dirección, color, horarios y si el gimnasio funciona con acceso libre, con turnos o en modo híbrido.
         </p>
       </section>
 

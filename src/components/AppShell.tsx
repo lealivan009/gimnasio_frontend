@@ -34,7 +34,7 @@ export function AppShell() {
               </NavLink>
               <NavLink to="/admin/ejercicios">Ejercicios</NavLink>
               <NavLink to="/admin/rutinas">Rutinas</NavLink>
-              <NavLink to="/admin/horarios">Horarios</NavLink>
+              <NavLink to="/admin/horarios">Plataforma</NavLink>
               <NavLink to="/admin/alumnos">Alumnos</NavLink>
               <NavLink to="/admin/pendientes">Pendientes</NavLink>
               {user?.role === "PROFESOR" ? <NavLink to="/cronometro">Cronómetro</NavLink> : null}

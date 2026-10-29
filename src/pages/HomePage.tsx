@@ -134,8 +134,8 @@ export function HomePage() {
         {isStaff(user.role) ? (
           <Link className="home-tile" to="/admin/horarios">
             <span className="home-tile-index">05</span>
-            <strong>Horarios</strong>
-            <p>Semana, turnos y cupos.</p>
+            <strong>Plataforma</strong>
+            <p>Nombre, portada, horarios y turnos.</p>
           </Link>
         ) : null}
         {isStaff(user.role) ? (
