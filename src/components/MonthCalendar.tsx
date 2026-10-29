@@ -34,16 +34,16 @@ export function MonthCalendar({
 
   return (
     <>
-      <div className="table-header">
+      <div className="calendar-head">
         <h2>Calendario</h2>
-        <div className="pager-actions">
-          <button type="button" className="btn-ghost" onClick={() => onShift(-1)}>
+        <div className="calendar-nav">
+          <button type="button" className="btn-ghost calendar-prev" onClick={() => onShift(-1)}>
             Anterior
           </button>
-          <span className="table-meta">
+          <span className="table-meta calendar-month">
             {MONTHS[month - 1]} {year}
           </span>
-          <button type="button" className="btn-ghost" onClick={() => onShift(1)}>
+          <button type="button" className="btn-ghost calendar-next" onClick={() => onShift(1)}>
             Siguiente
           </button>
         </div>

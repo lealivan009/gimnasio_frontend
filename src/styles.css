@@ -1549,6 +1549,43 @@ textarea:focus {
   .heat-cell {
     min-height: 36px;
   }
+
+  .session-card {
+    padding: 18px 14px;
+  }
+
+  .calendar-head {
+    display: grid;
+    justify-items: start;
+  }
+
+  .calendar-nav {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "month month"
+      "prev next";
+    gap: 8px;
+  }
+
+  .calendar-month {
+    grid-area: month;
+    min-width: 0;
+    text-align: center;
+  }
+
+  .calendar-prev {
+    grid-area: prev;
+  }
+
+  .calendar-next {
+    grid-area: next;
+  }
+
+  .calendar-nav .btn-ghost {
+    width: 100%;
+  }
 }
 
 textarea {
@@ -1742,6 +1779,8 @@ textarea {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 6px;
+  width: 100%;
+  min-width: 0;
 }
 
 .heat-weekdays {
@@ -1751,7 +1790,28 @@ textarea {
   text-align: center;
 }
 
+.calendar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 8px 0 14px;
+}
+
+.calendar-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.calendar-month {
+  min-width: 8.5rem;
+  text-align: center;
+}
+
 .heat-cell {
+  min-width: 0;
   min-height: 52px;
   display: flex;
   flex-direction: column;
@@ -1761,6 +1821,7 @@ textarea {
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.06);
   font-size: 13px;
+  overflow: hidden;
 }
 
 .heat-cell.pick {
