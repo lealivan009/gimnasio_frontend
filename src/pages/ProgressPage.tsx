@@ -284,7 +284,10 @@ export function ProgressPage() {
           <ul className="plain-list">
             {summary.records.map((record) => (
               <li key={record.exerciseId}>
-                <strong>{record.exerciseName}</strong> · {formatKg(record.maxWeightKg)} · {formatDate(record.achievedAt.slice(0, 10))}
+                <strong>{record.exerciseName}</strong>
+                <span>
+                  {formatKg(record.maxWeightKg)} · {formatDate(record.achievedAt.slice(0, 10))}
+                </span>
               </li>
             ))}
           </ul>

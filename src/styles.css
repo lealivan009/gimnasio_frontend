@@ -1661,11 +1661,114 @@ textarea {
 }
 
 .plain-list {
+  list-style: none;
   margin: 0;
-  padding-left: 18px;
-  color: var(--muted);
+  padding: 0;
   display: grid;
-  gap: 6px;
+  gap: 8px;
+}
+
+.plain-list li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 2px 12px;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.plain-list li strong {
+  color: var(--text);
+  font-weight: 600;
+  min-width: 0;
+}
+
+.plain-list li span {
+  color: var(--muted);
+}
+
+.home-brief {
+  display: grid;
+  gap: 14px;
+}
+
+.home-brief-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.home-brief .eyebrow {
+  margin-bottom: 4px;
+}
+
+.home-brief h1,
+.home-routine-title {
+  font-size: 1.45rem;
+  line-height: 1.15;
+  margin: 0 0 6px;
+}
+
+.home-brief .lede,
+.home-routine-meta p {
+  margin: 0;
+}
+
+.home-occupancy {
+  flex: 0 0 auto;
+  text-align: right;
+}
+
+.home-occupancy strong {
+  display: block;
+  font-family: var(--serif);
+  font-size: 1.7rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.home-occupancy span,
+.home-occupancy p {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.home-occupancy p {
+  margin: 4px 0 0;
+}
+
+.home-attendance {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.home-attendance p,
+.home-attendance .form-actions {
+  margin: 0;
+}
+
+.home-routine-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-bottom: 8px;
+}
+
+.home-routine-meta .pill {
+  margin-left: 0;
 }
 
 .pill.custom {

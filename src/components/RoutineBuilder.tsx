@@ -218,8 +218,11 @@ export function RoutineOutline({ exercises }: { exercises: RoutineExercise[] }) 
           <ul className="plain-list">
             {day.exercises.map((exercise) => (
               <li key={exercise.id}>
-                {exercise.exerciseName} · {MUSCLE_LABELS[exercise.muscleGroup]} · {exercise.targetSets}×
-                {exercise.targetReps} · descanso {exercise.targetRestSeconds}s
+                <strong>{exercise.exerciseName}</strong>
+                <span>
+                  {MUSCLE_LABELS[exercise.muscleGroup]} · {exercise.targetSets}×{exercise.targetReps} ·{" "}
+                  {exercise.targetRestSeconds}s
+                </span>
               </li>
             ))}
           </ul>

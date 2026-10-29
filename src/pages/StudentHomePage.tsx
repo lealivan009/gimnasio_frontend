@@ -159,67 +159,61 @@ export function StudentHomePage() {
 
   const weekday = DAY_LABELS[new Date().getDay() === 0 ? 7 : new Date().getDay()];
   const hoursLine = gym?.hours?.length ? todayHoursText(gym.hours) : null;
+  const presentLabel =
+    attendance?.checkInTime && !attendance.checkOutTime
+      ? "Estás adentro"
+      : attendance?.checkInTime
+        ? "Presente"
+        : "Sin presente";
 
   return (
     <div className="gym-home">
-      <section className="session-card">
-        <p className="eyebrow">{weekday}</p>
-        <h1>Tu entrenamiento de hoy</h1>
-        <p className="lede">
-          {hoursLine ? `${hoursLine} ` : ""}
-          {mode ? MODE_LABELS[mode] : "Gimnasio"} · anotá cada serie apenas la termines.
-        </p>
+      <section className="session-card home-brief">
+        <div className="home-brief-row">
+          <div>
+            <p className="eyebrow">{weekday}</p>
+            <h1>Hoy</h1>
+            <p className="lede">
+              {hoursLine ?? "Horario sin cargar"}
+              {mode ? ` · ${MODE_LABELS[mode]}` : ""}
+            </p>
+          </div>
+          {mode !== "CLASS_SCHEDULED" && occupancy ? (
+            <div className="home-occupancy">
+              <strong>
+                {occupancy.currentOccupancy}
+                <span>/{occupancy.maxCapacity}</span>
+              </strong>
+              <p>{occupancy.openNow ? "Abierto" : "Cerrado"}</p>
+            </div>
+          ) : null}
+        </div>
         {error ? <p className="alert">{error}</p> : null}
         {notice ? <p className="alert ok">{notice}</p> : null}
+        <div className="home-attendance">
+          <p>{presentLabel}</p>
+          <div className="form-actions">
+            <button
+              type="button"
+              className="btn-primary btn-inline"
+              disabled={busyId === "in" || Boolean(attendance && !attendance.checkOutTime)}
+              onClick={() => runAction("in", async () => { await api.checkIn(); setNotice("Ingreso registrado"); })}
+            >
+              Registrar ingreso
+            </button>
+            <button
+              type="button"
+              className="btn-ghost"
+              disabled={busyId === "out" || !attendance || Boolean(attendance.checkOutTime)}
+              onClick={() => runAction("out", async () => { await api.checkOut(); setNotice("Salida registrada"); })}
+            >
+              Registrar salida
+            </button>
+          </div>
+        </div>
       </section>
 
       {loading ? <p className="lede">Cargando…</p> : null}
-
-      {mode !== "CLASS_SCHEDULED" && occupancy ? (
-        <section className="session-card">
-          <h2>Ocupación</h2>
-          <p className="occupancy-figure">
-            {occupancy.currentOccupancy}
-            <span> / {occupancy.maxCapacity}</span>
-          </p>
-          <p className="lede">{occupancy.openNow ? "El gimnasio está abierto." : "El gimnasio está cerrado en este horario."}</p>
-          <div className="progress-track" aria-hidden>
-            <span
-              className="progress-fill"
-              style={{ width: `${Math.min(100, (occupancy.currentOccupancy / Math.max(occupancy.maxCapacity, 1)) * 100)}%` }}
-            />
-          </div>
-        </section>
-      ) : null}
-
-      <section className="session-card">
-        <h2>Asistencia de hoy</h2>
-        {attendance?.checkInTime && !attendance.checkOutTime ? (
-          <p className="lede">Estás adentro.</p>
-        ) : attendance?.checkInTime ? (
-          <p className="lede">Hoy tuviste presente.</p>
-        ) : (
-          <p className="lede">Todavía no hay presente de hoy. Podés marcarlo vos, o lo marca el profesor.</p>
-        )}
-        <div className="form-actions">
-          <button
-            type="button"
-            className="btn-primary btn-inline"
-            disabled={busyId === "in" || Boolean(attendance && !attendance.checkOutTime)}
-            onClick={() => runAction("in", async () => { await api.checkIn(); setNotice("Ingreso registrado"); })}
-          >
-            Registrar ingreso
-          </button>
-          <button
-            type="button"
-            className="btn-ghost"
-            disabled={busyId === "out" || !attendance || Boolean(attendance.checkOutTime)}
-            onClick={() => runAction("out", async () => { await api.checkOut(); setNotice("Salida registrada"); })}
-          >
-            Registrar salida
-          </button>
-        </div>
-      </section>
 
       {mode !== "FREE_ACCESS" ? (
         <section className="session-card">
@@ -284,22 +278,22 @@ export function StudentHomePage() {
       ) : null}
 
       <section className="session-card">
-        <h2>Rutina activa</h2>
+        <p className="eyebrow">Rutina activa</p>
         {active?.routine && active.assignment ? (
           <>
-            <div className="routine-card-head">
-              <strong>{active.routine.title}</strong>
+            <h2 className="home-routine-title">{active.routine.title}</h2>
+            <div className="home-routine-meta">
               {active.routine.customStudent ? (
-                <span className="pill custom">Personalizada por el alumno</span>
+                <span className="pill custom">Personalizada</span>
               ) : (
-                <span className="pill on">Asignada por el profesor</span>
+                <span className="pill on">Profesor</span>
               )}
+              <p>
+                {active.assignment.expirationDate
+                  ? `Vence el ${active.assignment.expirationDate.split("-").reverse().join("/")}`
+                  : "Sin vencimiento"}
+              </p>
             </div>
-            {active.assignment.expirationDate ? (
-              <p className="lede">Vence el {active.assignment.expirationDate.split("-").reverse().join("/")}.</p>
-            ) : (
-              <p className="lede">Sin fecha de vencimiento.</p>
-            )}
           </>
         ) : (
           <>
@@ -501,8 +495,11 @@ function TrainingDay({
                     <ul className="plain-list">
                       {done.map((log) => (
                         <li key={log.id}>
-                          Serie {log.setNumber}: {log.repsCompleted} reps · {formatKg(log.weightKg)}
-                          {log.rpe ? ` · esfuerzo ${log.rpe}` : ""}
+                          <strong>Serie {log.setNumber}</strong>
+                          <span>
+                            {log.repsCompleted} reps · {formatKg(log.weightKg)}
+                            {log.rpe ? ` · esfuerzo ${log.rpe}` : ""}
+                          </span>
                         </li>
                       ))}
                     </ul>
@@ -583,8 +580,11 @@ function TrainingDay({
                   .sort((a, b) => a.exerciseName.localeCompare(b.exerciseName) || a.setNumber - b.setNumber)
                   .map((log) => (
                     <li key={log.id}>
-                      {log.exerciseName} · serie {log.setNumber}: {log.repsCompleted} reps · {formatKg(log.weightKg)}
-                      {log.rpe ? ` · esfuerzo ${log.rpe}` : ""}
+                      <strong>{log.exerciseName}</strong>
+                      <span>
+                        Serie {log.setNumber} · {log.repsCompleted} reps · {formatKg(log.weightKg)}
+                        {log.rpe ? ` · esfuerzo ${log.rpe}` : ""}
+                      </span>
                     </li>
                   ))}
               </ul>
