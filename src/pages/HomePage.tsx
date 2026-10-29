@@ -118,31 +118,31 @@ export function HomePage() {
           <p>Contraseña y estado de la cuenta.</p>
         </Link>
         {isStaff(user.role) ? (
-          <Link className="home-tile" to="/admin/ejercicios">
+          <Link className="home-tile" to="/admin/alumnos">
             <span className="home-tile-index">03</span>
+            <strong>Alumnos</strong>
+            <p>Rutina activa, vencimiento y asistencia.</p>
+          </Link>
+        ) : null}
+        {isStaff(user.role) ? (
+          <Link className="home-tile" to="/admin/ejercicios">
+            <span className="home-tile-index">04</span>
             <strong>Ejercicios</strong>
             <p>Catálogo con grupo muscular y video.</p>
           </Link>
         ) : null}
         {isStaff(user.role) ? (
           <Link className="home-tile" to="/admin/rutinas">
-            <span className="home-tile-index">04</span>
+            <span className="home-tile-index">05</span>
             <strong>Rutinas</strong>
             <p>Armalas, duplicálas y asignálas.</p>
           </Link>
         ) : null}
         {isStaff(user.role) ? (
           <Link className="home-tile" to="/admin/horarios">
-            <span className="home-tile-index">05</span>
+            <span className="home-tile-index">06</span>
             <strong>Plataforma</strong>
             <p>Nombre, portada, horarios y turnos.</p>
-          </Link>
-        ) : null}
-        {isStaff(user.role) ? (
-          <Link className="home-tile" to="/admin/alumnos">
-            <span className="home-tile-index">06</span>
-            <strong>Alumnos</strong>
-            <p>Rutina activa, vencimiento y asistencia.</p>
           </Link>
         ) : null}
       </section>
