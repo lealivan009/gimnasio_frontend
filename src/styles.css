@@ -1721,9 +1721,17 @@ textarea {
   margin: 0;
 }
 
+.home-brief .pill {
+  margin-top: 10px;
+}
+
 .home-occupancy {
   flex: 0 0 auto;
   text-align: right;
+}
+
+.home-occupancy .eyebrow {
+  margin-bottom: 4px;
 }
 
 .home-occupancy strong {
@@ -1734,29 +1742,61 @@ textarea {
   line-height: 1;
 }
 
-.home-occupancy span,
-.home-occupancy p {
+.home-occupancy span {
   color: var(--muted);
-  font-size: 13px;
-}
-
-.home-occupancy p {
-  margin: 4px 0 0;
+  font-size: 1rem;
 }
 
 .home-attendance {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
+  display: grid;
   gap: 10px;
   padding-top: 12px;
   border-top: 1px solid var(--line);
 }
 
+.home-attendance .eyebrow {
+  margin-bottom: 2px;
+}
+
 .home-attendance p,
 .home-attendance .form-actions {
   margin: 0;
+}
+
+.session-card h3.day-log-title {
+  margin: 18px 0 0;
+  font-size: 1.05rem;
+}
+
+.muscle-block {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.muscle-block .eyebrow {
+  margin: 0;
+}
+
+.exercise-sets {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.exercise-sets strong {
+  display: block;
+}
+
+.exercise-sets ul {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 14px;
 }
 
 .home-routine-meta {

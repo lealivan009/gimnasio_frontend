@@ -3,6 +3,7 @@ import { api } from "../api/client";
 import {
   DAY_LABELS,
   MODE_LABELS,
+  MUSCLE_GROUPS,
   MUSCLE_LABELS,
   STATUS_LABELS,
   dayTitle,
@@ -163,8 +164,8 @@ export function StudentHomePage() {
     attendance?.checkInTime && !attendance.checkOutTime
       ? "Estás adentro"
       : attendance?.checkInTime
-        ? "Presente"
-        : "Sin presente";
+        ? "Salida marcada"
+        : "Todavía no la marcaste";
 
   return (
     <div className="gym-home">
@@ -173,25 +174,30 @@ export function StudentHomePage() {
           <div>
             <p className="eyebrow">{weekday}</p>
             <h1>Hoy</h1>
-            <p className="lede">
-              {hoursLine ?? "Horario sin cargar"}
-              {mode ? ` · ${MODE_LABELS[mode]}` : ""}
-            </p>
+            <p className="lede">{hoursLine ?? "Horario sin cargar"}{mode ? ` · ${MODE_LABELS[mode]}` : ""}</p>
+            {mode !== "CLASS_SCHEDULED" && occupancy ? (
+              <span className={occupancy.openNow ? "pill on" : "pill off"}>
+                {occupancy.openNow ? "Abierto" : "Cerrado"}
+              </span>
+            ) : null}
           </div>
           {mode !== "CLASS_SCHEDULED" && occupancy ? (
             <div className="home-occupancy">
+              <p className="eyebrow">Gente ahora</p>
               <strong>
                 {occupancy.currentOccupancy}
                 <span>/{occupancy.maxCapacity}</span>
               </strong>
-              <p>{occupancy.openNow ? "Abierto" : "Cerrado"}</p>
             </div>
           ) : null}
         </div>
         {error ? <p className="alert">{error}</p> : null}
         {notice ? <p className="alert ok">{notice}</p> : null}
         <div className="home-attendance">
-          <p>{presentLabel}</p>
+          <div>
+            <p className="eyebrow">Asistencia</p>
+            <p>{presentLabel}</p>
+          </div>
           <div className="form-actions">
             <button
               type="button"
@@ -572,26 +578,69 @@ function TrainingDay({
               : formatDate(selectedDate)}
           </p>
           {selectedSessions.map(([number, session]) => (
-            <div key={number}>
-              <strong>{session.label ? (number > 0 ? `Día ${number} · ${session.label}` : session.label) : number > 0 ? `Día ${number}` : "Entrenamiento"}</strong>
-              <ul className="plain-list">
-                {session.logs
-                  .slice()
-                  .sort((a, b) => a.exerciseName.localeCompare(b.exerciseName) || a.setNumber - b.setNumber)
-                  .map((log) => (
-                    <li key={log.id}>
-                      <strong>{log.exerciseName}</strong>
-                      <span>
-                        Serie {log.setNumber} · {log.repsCompleted} reps · {formatKg(log.weightKg)}
-                        {log.rpe ? ` · esfuerzo ${log.rpe}` : ""}
-                      </span>
-                    </li>
-                  ))}
-              </ul>
-            </div>
+            <DayLog
+              key={number}
+              title={
+                session.label
+                  ? number > 0
+                    ? `Día ${number} · ${session.label}`
+                    : session.label
+                  : number > 0
+                    ? `Día ${number}`
+                    : "Entrenamiento"
+              }
+              logs={session.logs}
+              routineExercises={routineExercises}
+            />
           ))}
         </div>
       )}
     </>
+  );
+}
+
+function DayLog({
+  title,
+  logs,
+  routineExercises,
+}: {
+  title: string;
+  logs: WorkoutLog[];
+  routineExercises: RoutineExercise[];
+}) {
+  const muscleOf = new Map(routineExercises.map((exercise) => [exercise.exerciseId, exercise.muscleGroup]));
+  const grouped = new Map<string, Map<string, WorkoutLog[]>>();
+  for (const log of [...logs].sort((a, b) => a.setNumber - b.setNumber)) {
+    const muscle = muscleOf.get(log.exerciseId) ?? "OTROS";
+    const exercises = grouped.get(muscle) ?? new Map<string, WorkoutLog[]>();
+    const sets = exercises.get(log.exerciseId) ?? [];
+    sets.push(log);
+    exercises.set(log.exerciseId, sets);
+    grouped.set(muscle, exercises);
+  }
+  const blocks = [...MUSCLE_GROUPS, "OTROS"].filter((key) => grouped.has(key));
+
+  return (
+    <div className="day-log">
+      <h3 className="day-log-title">{title}</h3>
+      {blocks.map((muscle) => (
+        <section className="muscle-block" key={muscle}>
+          <p className="eyebrow">{muscle in MUSCLE_LABELS ? MUSCLE_LABELS[muscle as keyof typeof MUSCLE_LABELS] : "Otros"}</p>
+          {[...(grouped.get(muscle)?.entries() ?? [])].map(([exerciseId, sets]) => (
+            <article className="exercise-sets" key={exerciseId}>
+              <strong>{sets[0]?.exerciseName}</strong>
+              <ul>
+                {sets.map((log) => (
+                  <li key={log.id}>
+                    Serie {log.setNumber} · {log.repsCompleted} reps · {formatKg(log.weightKg)}
+                    {log.rpe ? ` · esfuerzo ${log.rpe}` : ""}
+                  </li>
+                ))}
+              </ul>
+            </article>
+          ))}
+        </section>
+      ))}
+    </div>
   );
 }

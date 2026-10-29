@@ -1,5 +1,5 @@
 import type { Exercise, RoutineExercise, RoutineExerciseInput } from "../api/gym";
-import { dayTitle, MUSCLE_LABELS, routineDays } from "../api/gym";
+import { dayTitle, MUSCLE_GROUPS, MUSCLE_LABELS, routineDays } from "../api/gym";
 
 export interface DraftExercise {
   key: string;
@@ -212,22 +212,35 @@ export function RoutineOutline({ exercises }: { exercises: RoutineExercise[] }) 
   const named = days.length > 1 || Boolean(days[0]?.label);
   return (
     <div className="stack">
-      {days.map((day) => (
-        <div key={day.dayNumber}>
-          {named ? <p className="cell-note">{dayTitle(day)}</p> : null}
-          <ul className="plain-list">
-            {day.exercises.map((exercise) => (
-              <li key={exercise.id}>
-                <strong>{exercise.exerciseName}</strong>
-                <span>
-                  {MUSCLE_LABELS[exercise.muscleGroup]} · {exercise.targetSets}×{exercise.targetReps} ·{" "}
-                  {exercise.targetRestSeconds}s
-                </span>
-              </li>
+      {days.map((day) => {
+        const grouped = new Map<string, RoutineExercise[]>();
+        for (const exercise of day.exercises) {
+          const current = grouped.get(exercise.muscleGroup) ?? [];
+          current.push(exercise);
+          grouped.set(exercise.muscleGroup, current);
+        }
+        const blocks = MUSCLE_GROUPS.filter((key) => grouped.has(key));
+        return (
+          <div className="day-log" key={day.dayNumber}>
+            {named ? <h3 className="day-log-title">{dayTitle(day)}</h3> : null}
+            {blocks.map((muscle) => (
+              <section className="muscle-block" key={muscle}>
+                <p className="eyebrow">{MUSCLE_LABELS[muscle]}</p>
+                <ul className="plain-list">
+                  {(grouped.get(muscle) ?? []).map((exercise) => (
+                    <li key={exercise.id}>
+                      <strong>{exercise.exerciseName}</strong>
+                      <span>
+                        {exercise.targetSets}×{exercise.targetReps} · {exercise.targetRestSeconds}s
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
             ))}
-          </ul>
-        </div>
-      ))}
+          </div>
+        );
+      })}
     </div>
   );
 }
