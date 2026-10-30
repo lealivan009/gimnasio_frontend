@@ -2009,7 +2009,39 @@ a.btn-ghost {
   font-weight: 600;
 }
 
+.chart-plot {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 8px;
+  min-width: 0;
+}
+
+.chart-scale {
+  display: grid;
+  grid-row: 1;
+  grid-template-rows: 36fr 49fr 49fr 16fr;
+  align-items: end;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.chart-scale span {
+  transform: translateY(50%);
+  white-space: nowrap;
+}
+
+.chart-canvas {
+  position: relative;
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+}
+
 .line-chart {
+  display: block;
   width: 100%;
   height: auto;
   color: var(--accent);
@@ -2027,8 +2059,54 @@ a.btn-ghost {
   fill: currentColor;
 }
 
+.chart-grid,
 .chart-axis {
-  stroke: rgba(35, 48, 68, 0.18);
+  stroke: rgba(255, 255, 255, 0.16);
+  stroke-width: 1;
+}
+
+.chart-value {
+  position: absolute;
+  transform: translate(-50%, calc(-100% - 8px));
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.chart-value.is-start {
+  transform: translate(0, calc(-100% - 8px));
+}
+
+.chart-value.is-end {
+  transform: translate(-100%, calc(-100% - 8px));
+}
+
+.chart-dates {
+  position: relative;
+  grid-column: 2;
+  height: 16px;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1;
+}
+
+.chart-dates span {
+  position: absolute;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.chart-dates span.is-start {
+  transform: none;
+}
+
+.chart-dates span.is-end {
+  transform: translateX(-100%);
 }
 
 .heat-weekdays,

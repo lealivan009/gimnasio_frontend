@@ -238,6 +238,7 @@ export function ProgressPage() {
         )}
         <LineChart
           label="Evolución del peso corporal"
+          unit="kg"
           points={weights.map((item) => ({ label: formatDate(item.recordedOn), value: Number(item.weightKg) }))}
         />
       </section>
@@ -260,6 +261,7 @@ export function ProgressPage() {
             <h3>Peso máximo</h3>
             <LineChart
               label="Peso máximo por día"
+              unit="kg"
               points={points.map((point) => ({ label: formatDate(point.date), value: Number(point.maxWeightKg) }))}
             />
           </div>
@@ -267,6 +269,7 @@ export function ProgressPage() {
             <h3>Volumen</h3>
             <LineChart
               label="Volumen por día"
+              unit="kg"
               points={points.map((point) => ({ label: formatDate(point.date), value: Number(point.volumeKg) }))}
             />
           </div>
