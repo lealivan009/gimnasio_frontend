@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../api/client";
 import type { User } from "../api/types";
+import { Toast } from "../components/Toast";
 
 export function PendingAccountsPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -59,7 +60,7 @@ export function PendingAccountsPage() {
         <p className="eyebrow">Cuentas</p>
         <h1>Pendientes</h1>
         <p className="lede">Estas cuentas se registraron solas y todavía no pueden entrar.</p>
-        {notice ? <p className="alert ok">{notice}</p> : null}
+        <Toast message={notice} onClose={() => setNotice(null)} />
       </section>
       <section className="session-card table-card">
         {error ? <p className="alert">{error}</p> : null}

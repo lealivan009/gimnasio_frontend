@@ -25,6 +25,7 @@ import {
 } from "../api/gym";
 import { useGymBrand } from "../auth/GymBrand";
 import { MonthCalendar } from "../components/MonthCalendar";
+import { Toast } from "../components/Toast";
 import { todayHoursText } from "../gym/hours";
 
 function monthStart(year: number, month: number) {
@@ -211,7 +212,7 @@ export function StudentHomePage() {
           ) : null}
         </div>
         {error ? <p className="alert">{error}</p> : null}
-        {notice ? <p className="alert ok">{notice}</p> : null}
+        <Toast message={notice} onClose={() => setNotice(null)} />
         <div className="home-attendance">
           <div>
             <p className="eyebrow">Asistencia</p>

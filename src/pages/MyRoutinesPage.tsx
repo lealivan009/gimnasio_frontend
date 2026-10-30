@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 import { assignmentState, formatDate, type Assignment, type Routine } from "../api/gym";
 import { RoutineOutline } from "../components/RoutineBuilder";
+import { Toast } from "../components/Toast";
 
 export function MyRoutinesPage() {
   const location = useLocation();
@@ -56,21 +57,9 @@ export function MyRoutinesPage() {
       <section className="session-card">
         <p className="eyebrow">Alumno</p>
         <h1>Mis rutinas</h1>
-        <p className="lede">
-          Podés usar la del profesor o armarte una propia con el catálogo del gimnasio. Las tuyas quedan marcadas como
-          personalizadas.
-        </p>
-        <div className="form-actions">
-          <Link className="btn-primary btn-inline" to="/alumno/mis-rutinas/nueva">
-            Crear rutina propia
-          </Link>
-        </div>
-      </section>
-
-      <section className="session-card">
-        <h2>Asignadas</h2>
+        <p className="lede">Estas son las rutinas que tenés para entrenar.</p>
         {error ? <p className="alert">{error}</p> : null}
-        {notice ? <p className="alert ok">{notice}</p> : null}
+        <Toast message={notice} onClose={() => setNotice(null)} />
         {loading ? (
           <p className="lede">Cargando…</p>
         ) : assignments.length === 0 ? (
@@ -102,6 +91,18 @@ export function MyRoutinesPage() {
             })}
           </div>
         )}
+      </section>
+
+      <section className="session-card">
+        <h2>Rutina propia</h2>
+        <p className="lede">
+          Si querés, podés armarte una rutina con el catálogo del gimnasio. Queda marcada como personalizada.
+        </p>
+        <div className="form-actions">
+          <Link className="btn-ghost" to="/alumno/mis-rutinas/nueva">
+            Crear rutina propia
+          </Link>
+        </div>
       </section>
     </>
   );

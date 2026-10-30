@@ -5,6 +5,7 @@ import { roleLabel, type Role, type User } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import { Field } from "../components/AuthForm";
 import { PasswordHint } from "../components/PasswordHint";
+import { Toast } from "../components/Toast";
 
 const PAGE_SIZES = [10, 25, 50] as const;
 
@@ -245,7 +246,7 @@ export function UsersPage() {
         </div>
 
         {error ? <p className="alert">{error}</p> : null}
-        {notice ? <p className="alert ok">{notice}</p> : null}
+        <Toast message={notice} onClose={() => setNotice(null)} />
         {loading ? (
           <p className="lede">Cargando…</p>
         ) : users.length === 0 ? (

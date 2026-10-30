@@ -15,6 +15,7 @@ import { useAuth } from "../auth/AuthContext";
 import { Field } from "../components/AuthForm";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { ProfileFields, BodyFields, CoachFields } from "../components/ProfileFields";
+import { Toast } from "../components/Toast";
 
 function formatDateTime(value: string | null | undefined) {
   if (!value) {
@@ -203,7 +204,7 @@ export function UserDetailPage() {
       </section>
 
       {error ? <p className="alert">{error}</p> : null}
-      {notice ? <p className="alert ok">{notice}</p> : null}
+      <Toast message={notice} onClose={() => setNotice(null)} />
 
       <form className="session-card" onSubmit={onSave}>
         <h2>Datos personales</h2>

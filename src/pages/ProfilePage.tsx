@@ -4,6 +4,7 @@ import { displayName, emptyProfile, homePath, isStudent, profileFromUser, profil
 import { useAuth } from "../auth/AuthContext";
 import { Field } from "../components/AuthForm";
 import { BodyFields, CoachFields, ProfileFields } from "../components/ProfileFields";
+import { Toast } from "../components/Toast";
 
 export function ProfilePage() {
   const { user, updateProfile } = useAuth();
@@ -69,7 +70,7 @@ export function ProfilePage() {
         <h2>Datos personales</h2>
         <p className="lede">Estos datos son tuyos. El email se gestiona con el administrador si necesitás cambiarlo.</p>
         {error ? <p className="alert">{error}</p> : null}
-        {notice ? <p className="alert ok">{notice}</p> : null}
+        <Toast message={notice} onClose={() => setNotice(null)} />
         <div className="form-grid">
           <Field
             id="profileFirstName"

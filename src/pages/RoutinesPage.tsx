@@ -10,6 +10,7 @@ import {
   type StudentFollow,
 } from "../api/gym";
 import { ConfirmDialog } from "../components/ConfirmDialog";
+import { Toast } from "../components/Toast";
 import { draftsToPayload, emptyDay, RoutineBuilder, RoutineOutline, routineToDrafts, type DraftDay } from "../components/RoutineBuilder";
 
 export function RoutinesPage() {
@@ -212,12 +213,12 @@ export function RoutinesPage() {
         </p>
       </section>
 
-      {error || notice ? (
-        <div className="session-card toast-banner">
-          {error ? <p className="alert">{error}</p> : null}
-          {notice ? <p className="alert ok">{notice}</p> : null}
-        </div>
+      {error ? (
+        <section className="session-card">
+          <p className="alert">{error}</p>
+        </section>
       ) : null}
+      <Toast message={notice} onClose={() => setNotice(null)} />
 
       <form className="session-card" onSubmit={onSubmit}>
         <h2>{editingId ? "Editar rutina" : "Nueva rutina"}</h2>

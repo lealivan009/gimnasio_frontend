@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { api } from "../api/client";
 import { MUSCLE_GROUPS, MUSCLE_LABELS, type Exercise, type MuscleGroup } from "../api/gym";
 import { ConfirmDialog } from "../components/ConfirmDialog";
+import { Toast } from "../components/Toast";
 
 const emptyForm = {
   name: "",
@@ -113,7 +114,7 @@ export function ExercisesPage() {
       <form className="session-card" onSubmit={onSubmit}>
         <h2>{editingId ? "Editar ejercicio" : "Nuevo ejercicio"}</h2>
         {error ? <p className="alert">{error}</p> : null}
-        {notice ? <p className="alert ok">{notice}</p> : null}
+        <Toast message={notice} onClose={() => setNotice(null)} />
         <div className="form-grid">
           <label className="field">
             <span className="field-label">Nombre</span>

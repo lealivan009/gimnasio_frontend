@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { api } from "../api/client";
 import type { AppSettings } from "../api/types";
 import { Field } from "../components/AuthForm";
+import { Toast } from "../components/Toast";
 
 const defaults: AppSettings = {
   allowPublicRegistration: true,
@@ -90,7 +91,7 @@ export function SettingsPage() {
       ) : (
         <form className="session-card" onSubmit={onSave}>
           {error ? <p className="alert">{error}</p> : null}
-          {notice ? <p className="alert ok">{notice}</p> : null}
+          <Toast message={notice} onClose={() => setNotice(null)} />
 
           <h2>Acceso</h2>
           <div className="settings-list">

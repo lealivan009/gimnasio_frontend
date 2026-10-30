@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api/client";
 import { formatDate, todayIso, type Attendance, type StudentFollow } from "../api/gym";
+import { Toast } from "../components/Toast";
 
 function formatDateTime(value: string | null) {
   if (!value) {
@@ -77,7 +78,7 @@ export function StudentsFollowPage() {
         <p className="lede">
           El alumno puede marcar su presente. Si se olvida, marcalo vos cuando entra y la salida cuando se va. Un día de esta semana se carga desde su progreso.
         </p>
-        {notice ? <p className="alert ok">{notice}</p> : null}
+        <Toast message={notice} onClose={() => setNotice(null)} />
       </section>
       <section className="session-card">
         <h2>En el gimnasio ahora</h2>

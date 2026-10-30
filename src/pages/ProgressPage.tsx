@@ -17,6 +17,7 @@ import { isStaff } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import { LineChart } from "../components/LineChart";
 import { MonthCalendar } from "../components/MonthCalendar";
+import { Toast } from "../components/Toast";
 
 export function ProgressPage() {
   const { user } = useAuth();
@@ -187,7 +188,7 @@ export function ProgressPage() {
           </p>
         ) : null}
         {error ? <p className="alert">{error}</p> : null}
-        {notice ? <p className="alert ok">{notice}</p> : null}
+        <Toast message={notice} onClose={() => setNotice(null)} />
         {loading && !summary ? <p className="lede">Cargando…</p> : null}
         {summary ? (
           <div className="progress-facts">

@@ -11,6 +11,7 @@ import {
   type OperatingMode,
 } from "../api/gym";
 import { useRefreshGymBrand } from "../auth/GymBrand";
+import { Toast } from "../components/Toast";
 import { draftFromHours, draftsToHours, type DayHoursDraft } from "../gym/hours";
 
 export function SchedulesPage() {
@@ -195,7 +196,7 @@ export function SchedulesPage() {
         <h2>Datos del gimnasio</h2>
         <p className="lede">El nombre, la descripción, la dirección, el horario y el color aparecen en la portada.</p>
         {error ? <p className="alert">{error}</p> : null}
-        {notice ? <p className="alert ok">{notice}</p> : null}
+        <Toast message={notice} onClose={() => setNotice(null)} />
         <label className="field">
           <span className="field-label">Nombre</span>
           <input
