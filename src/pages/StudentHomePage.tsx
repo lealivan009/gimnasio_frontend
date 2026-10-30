@@ -492,20 +492,18 @@ function TrainingDay({
                     </p>
                   </div>
                   {done.length > 0 ? (
-                    <ul className="plain-list">
+                    <ul className="set-chips">
                       {done.map((log) => (
                         <li key={log.id}>
-                          <strong>Serie {log.setNumber}</strong>
+                          <strong>{log.setNumber}</strong>
                           <span>
-                            {log.repsCompleted} reps · {formatKg(log.weightKg)}
-                            {log.rpe ? ` · esfuerzo ${log.rpe}` : ""}
+                            {log.repsCompleted}×{formatKg(log.weightKg)}
+                            {log.rpe ? ` · ${log.rpe}` : ""}
                           </span>
                         </li>
                       ))}
                     </ul>
-                  ) : (
-                    <p className="lede">Sin series todavía.</p>
-                  )}
+                  ) : null}
                   <form
                     className="set-form"
                     onSubmit={(event) => onLog(event, exercise.exerciseId, exercise.targetRestSeconds, exercise.exerciseName)}
@@ -524,7 +522,7 @@ function TrainingDay({
                       />
                     </label>
                     <label>
-                      <span>Peso (kg)</span>
+                      <span>Kg</span>
                       <input
                         inputMode="decimal"
                         type="number"
@@ -538,7 +536,7 @@ function TrainingDay({
                       />
                     </label>
                     <label>
-                      <span>Esfuerzo</span>
+                      <span>Esf.</span>
                       <select
                         value={draft.rpe}
                         onChange={(event) =>
@@ -554,7 +552,7 @@ function TrainingDay({
                       </select>
                     </label>
                     <button className="btn-primary" type="submit" disabled={busyId === exercise.exerciseId}>
-                      Anotar serie {done.length + 1}
+                      Serie {done.length + 1}
                     </button>
                   </form>
                 </article>

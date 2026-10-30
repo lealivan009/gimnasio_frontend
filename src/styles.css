@@ -1632,6 +1632,54 @@ textarea {
   gap: 10px;
 }
 
+.set-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.set-chips li {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 0;
+  padding: 3px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.set-chips li strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.tracker-card .set-form {
+  grid-template-columns: minmax(0, 0.7fr) minmax(0, 0.8fr) minmax(0, 0.7fr) auto;
+  gap: 8px;
+}
+
+.tracker-card .set-form label {
+  gap: 4px;
+}
+
+.tracker-card .set-form input,
+.tracker-card .set-form select {
+  padding: 8px 10px;
+}
+
+.tracker-card .set-form .btn-primary {
+  width: auto;
+  margin: 0;
+  padding: 8px 12px;
+  white-space: nowrap;
+}
+
 .routine-row,
 .routine-card,
 .tracker-card {
@@ -1639,6 +1687,11 @@ textarea {
   border: 1px solid var(--line);
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.04);
+}
+
+.tracker-card {
+  gap: 8px;
+  padding: 10px 12px;
 }
 
 .routine-row-head,
