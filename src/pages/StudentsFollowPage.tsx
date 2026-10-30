@@ -75,7 +75,7 @@ export function StudentsFollowPage() {
         <p className="eyebrow">Seguimiento</p>
         <h1>Alumnos</h1>
         <p className="lede">
-          El alumno puede marcar su presente. Si se olvida, marcalo vos cuando entra y la salida cuando se va.
+          El alumno puede marcar su presente. Si se olvida, marcalo vos cuando entra y la salida cuando se va. Un día de esta semana se carga desde su progreso.
         </p>
         {notice ? <p className="alert ok">{notice}</p> : null}
       </section>

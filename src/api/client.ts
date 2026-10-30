@@ -435,10 +435,12 @@ export class ApiClient {
     return this.request<Attendance[]>("/api/asistencia/adentro");
   }
 
-  staffCheckIn(studentId: string) {
-    return this.request<Attendance>(`/api/asistencia/ingreso?studentId=${encodeURIComponent(studentId)}`, {
-      method: "POST",
-    });
+  staffCheckIn(studentId: string, date?: string) {
+    const query = new URLSearchParams({ studentId });
+    if (date) {
+      query.set("fecha", date);
+    }
+    return this.request<Attendance>(`/api/asistencia/ingreso?${query}`, { method: "POST" });
   }
 
   staffCheckOut(studentId: string) {
@@ -447,8 +449,9 @@ export class ApiClient {
     });
   }
 
-  checkIn() {
-    return this.request<Attendance>("/api/asistencia/ingreso", { method: "POST" });
+  checkIn(date?: string) {
+    const qs = date ? `?fecha=${encodeURIComponent(date)}` : "";
+    return this.request<Attendance>(`/api/asistencia/ingreso${qs}`, { method: "POST" });
   }
 
   checkOut() {

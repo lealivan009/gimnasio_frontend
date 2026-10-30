@@ -2002,6 +2002,43 @@ a.btn-ghost {
   color: var(--muted);
 }
 
+.weight-log {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: end;
+}
+
+.weight-log .field {
+  margin: 0;
+}
+
+.weight-log .btn-primary {
+  width: auto;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.weight-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 12px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.weight-meta p {
+  margin: 0;
+}
+
+.weight-meta .text-btn {
+  padding: 0;
+  font-size: 14px;
+}
+
 .gym-charts h3,
 .session-card h3 {
   margin: 0 0 8px;
@@ -2220,6 +2257,10 @@ a.btn-ghost {
 
 .heat-cell.both {
   background: linear-gradient(135deg, rgba(61, 111, 140, 0.45), rgba(61, 143, 110, 0.45));
+}
+
+.heat-cell.is-future {
+  opacity: 0.38;
 }
 
 .heat-cell.mini {

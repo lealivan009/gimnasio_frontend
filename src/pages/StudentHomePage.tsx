@@ -36,6 +36,10 @@ function monthEnd(year: number, month: number) {
   return `${year}-${String(month).padStart(2, "0")}-${String(last).padStart(2, "0")}`;
 }
 
+function attendanceDate(value: string) {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Argentina/Buenos_Aires" }).format(new Date(value));
+}
+
 export function StudentHomePage() {
   const gym = useGymBrand();
   const today = todayIso();
@@ -46,6 +50,7 @@ export function StudentHomePage() {
   const [active, setActive] = useState<ActiveRoutine | null>(null);
   const [logs, setLogs] = useState<WorkoutLog[]>([]);
   const [attendance, setAttendance] = useState<Attendance | null>(null);
+  const [presentDates, setPresentDates] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -72,7 +77,7 @@ export function StudentHomePage() {
         api.getOccupancy(),
         api.getActiveRoutine(),
         api.listWorkouts({ from: logDate, to: logDate }),
-        api.attendanceToday(),
+        api.listAttendance({ from: oldestLogDate, to: today }),
         acceptsClasses ? api.listClasses({ date: today, active: true }) : Promise.resolve([]),
         acceptsClasses ? api.listBookings({ date: today }) : Promise.resolve([]),
         api.calendar(year, month),
@@ -82,7 +87,9 @@ export function StudentHomePage() {
     setOccupancy(nextOccupancy);
     setActive(nextActive);
     setLogs(nextLogs);
-    setAttendance(nextAttendance);
+    const dates = [...new Set(nextAttendance.map((item) => attendanceDate(item.checkInTime)))];
+    setPresentDates(dates);
+    setAttendance(nextAttendance.find((item) => attendanceDate(item.checkInTime) === today) ?? null);
     setClasses(nextClasses);
     setBookings(nextBookings);
     setCalendarDays(nextDays);
@@ -136,6 +143,18 @@ export function StudentHomePage() {
 
   async function onLog(event: FormEvent, exerciseId: string, restSeconds: number, exerciseName: string) {
     event.preventDefault();
+    if (logDate > today) {
+      setError("No podés cargar un día que todavía no llegó.");
+      return;
+    }
+    if (!presentDates.includes(logDate)) {
+      setError(
+        logDate === today
+          ? "Marcá el presente de hoy para anotar las series."
+          : "Marcá el presente de ese día en Progreso para anotar las series."
+      );
+      return;
+    }
     const draft = drafts[exerciseId] ?? { reps: "", weight: "", rpe: "" };
     const done = logs.filter((log) => log.exerciseId === exerciseId && (log.dayNumber ?? 1) === loggingDay).length;
     const day = routineDays(active?.routine?.exercises ?? []).find((item) => item.dayNumber === loggingDay);
@@ -216,6 +235,7 @@ export function StudentHomePage() {
               Registrar salida
             </button>
           </div>
+          <p className="hint left">Si te olvidaste un día de esta semana, marcalo en Progreso.</p>
         </div>
       </section>
 
@@ -323,13 +343,17 @@ export function StudentHomePage() {
           }}
           selectedDate={selectedDate}
           onSelect={(date) => {
+            if (date > today) {
+              return;
+            }
             setSelectedDate(date);
             setError(null);
-            if (date < oldestLogDate || date > today) {
+            if (date < oldestLogDate) {
               setLoggingDay(null);
               setChoosingDay(false);
             }
           }}
+          maxDate={today}
         />
         <p className="hint left">
           {selectedDate && selectedDate > today
@@ -379,6 +403,7 @@ export function StudentHomePage() {
             }}
             onLog={onLog}
             logDate={logDate}
+            present={presentDates.includes(logDate)}
           />
         ) : null}
       </section>
@@ -413,6 +438,7 @@ function TrainingDay({
   onClose,
   onLog,
   logDate,
+  present,
 }: {
   routineExercises: RoutineExercise[];
   logs: WorkoutLog[];
@@ -429,6 +455,7 @@ function TrainingDay({
   onClose: () => void;
   onLog: (event: FormEvent, exerciseId: string, restSeconds: number, exerciseName: string) => Promise<void>;
   logDate: string;
+  present: boolean;
 }) {
   const days = routineDays(routineExercises);
   const openDay = days.find((day) => day.dayNumber === loggingDay) ?? null;
@@ -447,7 +474,7 @@ function TrainingDay({
   return (
     <>
       <div className="form-actions">
-        <button type="button" className="btn-primary btn-inline" onClick={onStart}>
+        <button type="button" className="btn-primary btn-inline" onClick={onStart} disabled={logDate > today}>
           Cargar día
         </button>
         {choosingDay || loggingDay != null ? (
@@ -472,9 +499,17 @@ function TrainingDay({
         <>
           <h3 className="training-day-title">{sessionName(days, openDay.dayNumber)}</h3>
           <p className="lede">Cargando el {formatDate(logDate)}.</p>
-          <p className="hint left">
-            Esfuerzo es opcional, del 1 al 10: 1 es muy fácil y 10 es que no podrías hacer otra repetición.
-          </p>
+          {present ? (
+            <p className="hint left">
+              Esfuerzo es opcional, del 1 al 10: 1 es muy fácil y 10 es que no podrías hacer otra repetición.
+            </p>
+          ) : (
+            <p className="lede">
+              {logDate === today
+                ? "Marcá el presente de hoy para anotar las series."
+                : "Marcá el presente de ese día en Progreso para anotar las series."}
+            </p>
+          )}
           <div className="stack">
             {openDay.exercises.map((exercise) => {
               const done = logs
@@ -504,6 +539,7 @@ function TrainingDay({
                       ))}
                     </ul>
                   ) : null}
+                  {present ? (
                   <form
                     className="set-form"
                     onSubmit={(event) => onLog(event, exercise.exerciseId, exercise.targetRestSeconds, exercise.exerciseName)}
@@ -555,6 +591,7 @@ function TrainingDay({
                       Serie {done.length + 1}
                     </button>
                   </form>
+                  ) : null}
                 </article>
               );
             })}

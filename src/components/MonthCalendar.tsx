@@ -22,6 +22,9 @@ export function MonthCalendar({
   onShift,
   selectedDate,
   onSelect,
+  maxDate,
+  heading = "Calendario",
+  legend = true,
 }: {
   year: number;
   month: number;
@@ -29,13 +32,16 @@ export function MonthCalendar({
   onShift: (delta: number) => void;
   selectedDate?: string | null;
   onSelect?: (date: string) => void;
+  maxDate?: string;
+  heading?: string;
+  legend?: boolean;
 }) {
   const offset = days.length ? (new Date(`${days[0].date}T12:00:00`).getDay() + 6) % 7 : 0;
 
   return (
     <>
       <div className="calendar-head">
-        <h2>Calendario</h2>
+        {heading ? <h2>{heading}</h2> : null}
         <div className="calendar-nav">
           <button type="button" className="btn-ghost calendar-prev" onClick={() => onShift(-1)}>
             Anterior
@@ -59,6 +65,7 @@ export function MonthCalendar({
         ))}
         {days.map((day) => {
           const tone = day.attended && day.trained ? "both" : day.attended ? "attended" : day.trained ? "trained" : "";
+          const future = maxDate != null && day.date > maxDate;
           const label = (day.sessions ?? []).map((session) => session.label).join(" · ");
           const content = (
             <>
@@ -66,9 +73,13 @@ export function MonthCalendar({
               {label ? <small className="heat-label">{label}</small> : null}
             </>
           );
-          if (!onSelect) {
+          if (!onSelect || future) {
             return (
-              <span key={day.date} className={`heat-cell ${tone}`} title={label || day.date}>
+              <span
+                key={day.date}
+                className={`heat-cell ${tone}${future ? " is-future" : ""}`}
+                title={future ? "Todavía no llegó" : label || day.date}
+              >
                 {content}
               </span>
             );
@@ -86,11 +97,13 @@ export function MonthCalendar({
           );
         })}
       </div>
-      <p className="hint left">
-        <span className="heat-cell attended mini" /> Asistió
-        <span className="heat-cell trained mini" /> Entrenó
-        <span className="heat-cell both mini" /> Las dos
-      </p>
+      {legend ? (
+        <p className="hint left">
+          <span className="heat-cell attended mini" /> Asistió
+          <span className="heat-cell trained mini" /> Entrenó
+          <span className="heat-cell both mini" /> Las dos
+        </p>
+      ) : null}
     </>
   );
 }
