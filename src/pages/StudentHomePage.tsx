@@ -350,7 +350,6 @@ export function StudentHomePage() {
             loggingDay={loggingDay}
             busyId={busyId}
             drafts={drafts}
-            rest={rest}
             onDrafts={setDrafts}
             onChoose={(dayNumber) => {
               setLoggingDay(dayNumber);
@@ -378,12 +377,22 @@ export function StudentHomePage() {
               setLoggingDay(null);
               setChoosingDay(false);
             }}
-            onSkipRest={() => setRest(null)}
             onLog={onLog}
             logDate={logDate}
           />
         ) : null}
       </section>
+      {rest ? (
+        <div className="rest-timer" role="status">
+          <strong>
+            {Math.floor(rest.left / 60)}:{String(rest.left % 60).padStart(2, "0")}
+          </strong>
+          <p>Descanso · {rest.name}</p>
+          <button type="button" className="btn-ghost" onClick={() => setRest(null)}>
+            Omitir
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -398,12 +407,10 @@ function TrainingDay({
   loggingDay,
   busyId,
   drafts,
-  rest,
   onDrafts,
   onChoose,
   onStart,
   onClose,
-  onSkipRest,
   onLog,
   logDate,
 }: {
@@ -416,12 +423,10 @@ function TrainingDay({
   loggingDay: number | null;
   busyId: string | null;
   drafts: Record<string, { reps: string; weight: string; rpe: string }>;
-  rest: { name: string; left: number } | null;
   onDrafts: (next: Record<string, { reps: string; weight: string; rpe: string }>) => void;
   onChoose: (dayNumber: number) => void;
   onStart: () => void;
   onClose: () => void;
-  onSkipRest: () => void;
   onLog: (event: FormEvent, exerciseId: string, restSeconds: number, exerciseName: string) => Promise<void>;
   logDate: string;
 }) {
@@ -470,17 +475,6 @@ function TrainingDay({
           <p className="hint left">
             Esfuerzo es opcional, del 1 al 10: 1 es muy fácil y 10 es que no podrías hacer otra repetición.
           </p>
-          {rest ? (
-            <div className="rest-timer">
-              <p>Descanso · {rest.name}</p>
-              <strong>
-                {Math.floor(rest.left / 60)}:{String(rest.left % 60).padStart(2, "0")}
-              </strong>
-              <button type="button" className="btn-ghost" onClick={onSkipRest}>
-                {rest.left <= 0 ? "Seguir" : "Saltar descanso"}
-              </button>
-            </div>
-          ) : null}
           <div className="stack">
             {openDay.exercises.map((exercise) => {
               const done = logs
