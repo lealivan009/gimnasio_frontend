@@ -263,6 +263,10 @@ export class ApiClient {
     return this.request<Exercise[]>(`/api/ejercicios${qs ? `?${qs}` : ""}`);
   }
 
+  getExercise(id: string) {
+    return this.request<Exercise>(`/api/ejercicios/${encodeURIComponent(id)}`);
+  }
+
   createExercise(input: ExerciseInput) {
     return this.request<Exercise>("/api/ejercicios", { method: "POST", body: input });
   }

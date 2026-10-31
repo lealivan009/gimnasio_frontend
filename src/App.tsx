@@ -8,6 +8,8 @@ import { StudentRoute } from "./auth/StudentRoute";
 import { useAuth } from "./auth/AuthContext";
 import { AppShell } from "./components/AppShell";
 import { AccountPage } from "./pages/AccountPage";
+import { ExerciseFormPage } from "./pages/ExerciseFormPage";
+import { ExerciseViewPage } from "./pages/ExerciseViewPage";
 import { ExercisesPage } from "./pages/ExercisesPage";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 import { HomePage } from "./pages/HomePage";
@@ -57,6 +59,9 @@ export function App() {
           </Route>
           <Route element={<StaffRoute />}>
             <Route path="/admin/ejercicios" element={<ExercisesPage />} />
+            <Route path="/admin/ejercicios/nuevo" element={<ExerciseFormPage />} />
+            <Route path="/admin/ejercicios/:id" element={<ExerciseViewPage />} />
+            <Route path="/admin/ejercicios/:id/editar" element={<ExerciseFormPage />} />
             <Route path="/admin/rutinas" element={<RoutinesPage />} />
             <Route path="/admin/rutinas/nueva" element={<StaffRoutineFormPage />} />
             <Route path="/admin/rutinas/asignar" element={<AssignRoutinePage />} />
