@@ -22,10 +22,8 @@ import {
   type RoutineExercise,
   type WorkoutLog,
 } from "../api/gym";
-import { useGymBrand } from "../auth/GymBrand";
 import { MonthCalendar } from "../components/MonthCalendar";
 import { Toast } from "../components/Toast";
-import { todayHoursText } from "../gym/hours";
 
 function monthStart(year: number, month: number) {
   return `${year}-${String(month).padStart(2, "0")}-01`;
@@ -41,7 +39,6 @@ function attendanceDate(value: string) {
 }
 
 export function StudentHomePage() {
-  const gym = useGymBrand();
   const today = todayIso();
   const [mode, setMode] = useState<OperatingMode | null>(null);
   const [occupancy, setOccupancy] = useState<Occupancy | null>(null);
@@ -178,7 +175,6 @@ export function StudentHomePage() {
   }
 
   const weekday = DAY_LABELS[new Date().getDay() === 0 ? 7 : new Date().getDay()];
-  const hoursLine = gym?.hours?.length ? todayHoursText(gym.hours) : null;
   const presentLabel =
     attendance?.checkInTime && !attendance.checkOutTime
       ? "Estás adentro"
@@ -193,7 +189,6 @@ export function StudentHomePage() {
           <div>
             <p className="eyebrow">{weekday}</p>
             <h1>Hoy</h1>
-            <p className="lede">{hoursLine ?? "Horario sin cargar"}</p>
           </div>
           {mode !== "CLASS_SCHEDULED" && occupancy ? (
             <div className="home-occupancy">
@@ -224,7 +219,6 @@ export function StudentHomePage() {
               </button>
             </div>
           )}
-          <p className="hint left">Si te olvidaste un día de esta semana, marcalo en Progreso.</p>
         </div>
       </section>
 

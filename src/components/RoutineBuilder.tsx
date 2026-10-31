@@ -226,7 +226,7 @@ export function RoutineOutline({ exercises }: { exercises: RoutineExercise[] }) 
             {blocks.map((muscle) => (
               <section className="muscle-block" key={muscle}>
                 <p className="eyebrow">{MUSCLE_LABELS[muscle]}</p>
-                <ul className="plain-list">
+                <ul className="plain-list exercise-list">
                   {(grouped.get(muscle) ?? []).map((exercise) => (
                     <li key={exercise.id}>
                       <strong>{exercise.exerciseName}</strong>

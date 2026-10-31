@@ -55,41 +55,37 @@ export function MyRoutinesPage() {
   return (
     <>
       <section className="session-card">
-        <p className="eyebrow">Alumno</p>
-        <h1>Mis rutinas</h1>
-        <p className="lede">Estas son las rutinas que tenés para entrenar.</p>
+        <h1>Mi rutina</h1>
         {error ? <p className="alert">{error}</p> : null}
         <Toast message={notice} onClose={() => setNotice(null)} />
         {loading ? (
           <p className="lede">Cargando…</p>
         ) : assignments.length === 0 ? (
-          <p className="lede">Todavía no tenés rutinas asignadas.</p>
+          <p className="lede">Todavía no tenés una rutina asignada.</p>
         ) : (
-          <div className="stack">
-            {assignments.map((assignment) => {
-              const routine = routines[assignment.routineId];
-              return (
-                <article className="routine-card" key={assignment.id}>
-                  <div className="routine-card-head">
-                    <strong>{assignment.routineTitle}</strong>
-                    {assignment.customStudent ? (
-                      <span className="pill custom">Personalizada por el alumno</span>
-                    ) : (
-                      <span className="pill on">Profesor</span>
-                    )}
-                  </div>
-                  <p className="cell-note">
-                    Desde {formatDate(assignment.startDate)}
-                    {assignment.expirationDate ? ` hasta ${formatDate(assignment.expirationDate)}` : " · sin vencimiento"}
-                    {" · "}
-                    {assignmentState(assignment).toLowerCase()}
-                  </p>
-                  {routine?.description ? <p className="lede">{routine.description}</p> : null}
-                  {routine ? <RoutineOutline exercises={routine.exercises} /> : null}
-                </article>
-              );
-            })}
-          </div>
+          assignments.map((assignment) => {
+            const routine = routines[assignment.routineId];
+            return (
+              <div className="routine-block" key={assignment.id}>
+                <div className="routine-card-head">
+                  <strong>{assignment.routineTitle}</strong>
+                  {assignment.customStudent ? (
+                    <span className="pill custom">Personalizada por el alumno</span>
+                  ) : (
+                    <span className="pill on">Profesor</span>
+                  )}
+                </div>
+                <p className="cell-note">
+                  Desde {formatDate(assignment.startDate)}
+                  {assignment.expirationDate ? ` hasta ${formatDate(assignment.expirationDate)}` : " · sin vencimiento"}
+                  {" · "}
+                  {assignmentState(assignment).toLowerCase()}
+                </p>
+                {routine?.description ? <p className="lede">{routine.description}</p> : null}
+                {routine ? <RoutineOutline exercises={routine.exercises} /> : null}
+              </div>
+            );
+          })
         )}
       </section>
 
