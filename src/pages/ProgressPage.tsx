@@ -273,14 +273,6 @@ export function ProgressPage() {
               points={points.map((point) => ({ label: formatDate(point.date), value: Number(point.maxWeightKg) }))}
             />
           </div>
-          <div>
-            <h3>Volumen</h3>
-            <LineChart
-              label="Volumen por día"
-              unit="kg"
-              points={points.map((point) => ({ label: formatDate(point.date), value: Number(point.volumeKg) }))}
-            />
-          </div>
         </div>
       </section>
 
