@@ -1,5 +1,148 @@
-import type { Exercise, RoutineExercise, RoutineExerciseInput } from "../api/gym";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
+import type { Exercise, MuscleGroup, RoutineExercise, RoutineExerciseInput } from "../api/gym";
 import { dayTitle, MUSCLE_GROUPS, MUSCLE_LABELS, routineDays } from "../api/gym";
+
+function fold(value: string) {
+  return value.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
+}
+
+function sortCatalog(catalog: Exercise[]) {
+  return [...catalog].sort((left, right) => {
+    const group = MUSCLE_GROUPS.indexOf(left.muscleGroup) - MUSCLE_GROUPS.indexOf(right.muscleGroup);
+    if (group !== 0) {
+      return group;
+    }
+    return left.name.localeCompare(right.name, "es");
+  });
+}
+
+function ExercisePicker({
+  catalog,
+  value,
+  onChange,
+}: {
+  catalog: Exercise[];
+  value: string;
+  onChange: (exerciseId: string) => void;
+}) {
+  const listId = useId();
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [active, setActive] = useState(0);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const selected = catalog.find((exercise) => exercise.id === value) ?? null;
+  const selectedLabel = selected ? `${selected.name} · ${MUSCLE_LABELS[selected.muscleGroup]}` : "";
+  const needle = fold(query.trim());
+  const visible = useMemo(
+    () =>
+      catalog.filter((exercise) => {
+        if (!needle) {
+          return true;
+        }
+        return fold(exercise.name).includes(needle) || fold(MUSCLE_LABELS[exercise.muscleGroup]).includes(needle);
+      }),
+    [catalog, needle]
+  );
+
+  useEffect(() => {
+    inputRef.current?.setCustomValidity(value ? "" : "Elegí un ejercicio");
+  }, [value]);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+    function onPointer(event: PointerEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setOpen(false);
+        setQuery("");
+      }
+    }
+    document.addEventListener("pointerdown", onPointer);
+    return () => document.removeEventListener("pointerdown", onPointer);
+  }, [open]);
+
+  useEffect(() => {
+    setActive(0);
+  }, [needle]);
+
+  function choose(exerciseId: string) {
+    onChange(exerciseId);
+    setQuery("");
+    setOpen(false);
+  }
+
+  let lastGroup: MuscleGroup | "" = "";
+
+  return (
+    <div className="exercise-picker" ref={rootRef}>
+      <input
+        ref={inputRef}
+        value={open ? query : selectedLabel}
+        placeholder="Buscá por nombre"
+        role="combobox"
+        aria-expanded={open}
+        aria-autocomplete="list"
+        aria-controls={listId}
+        onFocus={() => {
+          setQuery("");
+          setOpen(true);
+        }}
+        onChange={(event) => {
+          setQuery(event.target.value);
+          setOpen(true);
+          if (!event.target.value) {
+            onChange("");
+          }
+        }}
+        onKeyDown={(event) => {
+          if (event.key === "ArrowDown") {
+            event.preventDefault();
+            setOpen(true);
+            setActive((current) => Math.min(current + 1, Math.max(visible.length - 1, 0)));
+          } else if (event.key === "ArrowUp") {
+            event.preventDefault();
+            setActive((current) => Math.max(current - 1, 0));
+          } else if (event.key === "Enter" && open && visible[active]) {
+            event.preventDefault();
+            choose(visible[active].id);
+          } else if (event.key === "Escape") {
+            setOpen(false);
+            setQuery("");
+          }
+        }}
+      />
+      {open ? (
+        <ul className="exercise-picker-list" id={listId} role="listbox">
+          {visible.length === 0 ? (
+            <li className="exercise-picker-empty">No hay ejercicios con ese nombre.</li>
+          ) : (
+            visible.map((exercise, index) => {
+              const showGroup = exercise.muscleGroup !== lastGroup;
+              lastGroup = exercise.muscleGroup;
+              return (
+                <li key={exercise.id}>
+                  {showGroup ? <p className="eyebrow">{MUSCLE_LABELS[exercise.muscleGroup]}</p> : null}
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={exercise.id === value}
+                    className={index === active ? "is-active" : undefined}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => choose(exercise.id)}
+                  >
+                    {exercise.name}
+                  </button>
+                </li>
+              );
+            })
+          )}
+        </ul>
+      ) : null}
+    </div>
+  );
+}
 
 export interface DraftExercise {
   key: string;
@@ -75,6 +218,8 @@ export function RoutineBuilder({
   catalog: Exercise[];
   onChange: (days: DraftDay[]) => void;
 }) {
+  const catalogSorted = useMemo(() => sortCatalog(catalog), [catalog]);
+
   function updateDay(key: string, patch: Partial<DraftDay>) {
     onChange(days.map((day) => (day.key === key ? { ...day, ...patch } : day)));
   }
@@ -132,18 +277,11 @@ export function RoutineBuilder({
               </div>
               <label className="field">
                 <span className="field-label">Ejercicio del catálogo</span>
-                <select
+                <ExercisePicker
+                  catalog={catalogSorted}
                   value={row.exerciseId}
-                  onChange={(event) => updateRow(day.key, row.key, { exerciseId: event.target.value })}
-                  required
-                >
-                  <option value="">Elegí un ejercicio</option>
-                  {catalog.map((exercise) => (
-                    <option key={exercise.id} value={exercise.id}>
-                      {exercise.name} · {MUSCLE_LABELS[exercise.muscleGroup]}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(exerciseId) => updateRow(day.key, row.key, { exerciseId })}
+                />
               </label>
               <div className="form-grid triple">
                 <label className="field">
