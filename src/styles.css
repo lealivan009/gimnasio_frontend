@@ -1073,6 +1073,37 @@ textarea:focus {
   margin-top: 8px;
 }
 
+.page-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.session-card .page-toolbar h1 {
+  margin: 0;
+}
+
+.page-toolbar .form-actions {
+  margin-top: 0;
+}
+
+a.btn-primary,
+a.btn-ghost,
+a.text-btn {
+  text-decoration: none;
+}
+
+a.btn-primary,
+a.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  margin-top: 0;
+}
+
 .app-main {
   max-width: 1080px;
   min-width: 0;

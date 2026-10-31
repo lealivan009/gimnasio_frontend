@@ -19,7 +19,10 @@ import { ProfilePage } from "./pages/ProfilePage";
 import { ProgressPage } from "./pages/ProgressPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
+import { AssignRoutinePage } from "./pages/AssignRoutinePage";
 import { RoutinesPage } from "./pages/RoutinesPage";
+import { StaffRoutineFormPage } from "./pages/StaffRoutineFormPage";
+import { StaffRoutineViewPage } from "./pages/StaffRoutineViewPage";
 import { SchedulesPage } from "./pages/SchedulesPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { StudentHomePage } from "./pages/StudentHomePage";
@@ -55,6 +58,10 @@ export function App() {
           <Route element={<StaffRoute />}>
             <Route path="/admin/ejercicios" element={<ExercisesPage />} />
             <Route path="/admin/rutinas" element={<RoutinesPage />} />
+            <Route path="/admin/rutinas/nueva" element={<StaffRoutineFormPage />} />
+            <Route path="/admin/rutinas/asignar" element={<AssignRoutinePage />} />
+            <Route path="/admin/rutinas/:id" element={<StaffRoutineViewPage />} />
+            <Route path="/admin/rutinas/:id/editar" element={<StaffRoutineFormPage />} />
             <Route path="/admin/horarios" element={<SchedulesPage />} />
             <Route path="/admin/alumnos" element={<StudentsFollowPage />} />
             <Route path="/admin/pendientes" element={<PendingAccountsPage />} />
