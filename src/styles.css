@@ -50,12 +50,14 @@ body,
 #root {
   min-height: 100%;
   max-width: 100%;
+}
+
+#root {
   overflow-x: clip;
 }
 
 body {
   margin: 0;
-  overflow-x: clip;
   font-family: var(--font);
   background:
     radial-gradient(1100px 520px at 8% -8%, var(--glow), transparent 55%),
@@ -657,7 +659,7 @@ textarea:focus {
   position: fixed;
   z-index: 40;
   left: 50%;
-  bottom: max(84px, calc(env(safe-area-inset-bottom) + 76px));
+  bottom: max(16px, env(safe-area-inset-bottom));
   transform: translateX(-50%);
   width: max-content;
   max-width: min(420px, calc(100vw - 24px));
@@ -1714,8 +1716,20 @@ textarea {
   align-items: flex-start;
 }
 
+.routine-card-head {
+  align-items: center;
+  gap: 8px;
+}
+
 .routine-card-head strong {
   min-width: 0;
+  flex: 1 1 100%;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .routine-card-head .actions {
@@ -1739,12 +1753,18 @@ textarea {
   align-items: baseline;
   gap: 2px 12px;
   margin: 0;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
+  padding: 8px 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: none;
   color: var(--muted);
   line-height: 1.35;
+}
+
+.plain-list li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
 }
 
 .plain-list li strong {
@@ -1783,10 +1803,6 @@ textarea {
 .home-brief .lede,
 .home-routine-meta p {
   margin: 0;
-}
-
-.home-brief .pill {
-  margin-top: 10px;
 }
 
 .home-occupancy {
@@ -1869,10 +1885,9 @@ textarea {
 }
 
 .exercise-sets {
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
+  padding: 0;
+  border: 0;
+  background: none;
 }
 
 .exercise-sets strong {

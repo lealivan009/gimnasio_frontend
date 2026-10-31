@@ -2,7 +2,6 @@ import { useEffect, useState, type FormEvent } from "react";
 import { api } from "../api/client";
 import {
   DAY_LABELS,
-  MODE_LABELS,
   MUSCLE_GROUPS,
   MUSCLE_LABELS,
   STATUS_LABELS,
@@ -194,12 +193,7 @@ export function StudentHomePage() {
           <div>
             <p className="eyebrow">{weekday}</p>
             <h1>Hoy</h1>
-            <p className="lede">{hoursLine ?? "Horario sin cargar"}{mode ? ` · ${MODE_LABELS[mode]}` : ""}</p>
-            {mode !== "CLASS_SCHEDULED" && occupancy ? (
-              <span className={occupancy.openNow ? "pill on" : "pill off"}>
-                {occupancy.openNow ? "Abierto" : "Cerrado"}
-              </span>
-            ) : null}
+            <p className="lede">{hoursLine ?? "Horario sin cargar"}</p>
           </div>
           {mode !== "CLASS_SCHEDULED" && occupancy ? (
             <div className="home-occupancy">

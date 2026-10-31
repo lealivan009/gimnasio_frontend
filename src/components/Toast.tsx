@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 
 export function Toast({ message, onClose }: { message: string | null; onClose: () => void }) {
   const closeRef = useRef(onClose);
@@ -16,9 +17,10 @@ export function Toast({ message, onClose }: { message: string | null; onClose: (
     return null;
   }
 
-  return (
+  return createPortal(
     <div className="toast" role="status">
       {message}
-    </div>
+    </div>,
+    document.body
   );
 }
