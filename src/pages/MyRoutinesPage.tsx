@@ -75,17 +75,20 @@ export function MyRoutinesPage() {
                   {assignmentState(assignment).toLowerCase()}
                 </p>
                 {routine?.description ? <p className="lede">{routine.description}</p> : null}
-                {routine ? <RoutineOutline exercises={routine.exercises} /> : null}
               </div>
             );
           })
         )}
-        <p className="routine-own">
-          <Link className="text-btn" to="/alumno/mis-rutinas/nueva">
-            Crear rutina propia
-          </Link>
-        </p>
       </section>
+      {assignments.map((assignment) => {
+        const routine = routines[assignment.routineId];
+        return routine ? <RoutineOutline key={assignment.id} exercises={routine.exercises} cards /> : null;
+      })}
+      <p className="routine-own">
+        <Link className="text-btn" to="/alumno/mis-rutinas/nueva">
+          Crear rutina propia
+        </Link>
+      </p>
     </>
   );
 }

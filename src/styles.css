@@ -1801,9 +1801,7 @@ textarea {
 }
 
 .routine-own {
-  margin: 18px 0 0;
-  padding-top: 14px;
-  border-top: 1px solid var(--line);
+  margin: 16px 4px 0;
 }
 
 .routine-own .text-btn {
@@ -1905,6 +1903,30 @@ textarea {
 .session-card h3.day-log-title {
   margin: 18px 0 0;
   font-size: 1.05rem;
+}
+
+.day-board {
+  display: grid;
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.day-board .session-card + .session-card {
+  margin-top: 0;
+}
+
+.session-card.day-card h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+
+.day-card .eyebrow {
+  margin-bottom: 4px;
+}
+
+.day-card .muscle-block:first-of-type {
+  margin-top: 14px;
 }
 
 .muscle-block {

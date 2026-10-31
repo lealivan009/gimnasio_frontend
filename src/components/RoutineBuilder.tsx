@@ -207,40 +207,59 @@ export function RoutineBuilder({
   );
 }
 
-export function RoutineOutline({ exercises }: { exercises: RoutineExercise[] }) {
+function DayExercises({ exercises }: { exercises: RoutineExercise[] }) {
+  const grouped = new Map<string, RoutineExercise[]>();
+  for (const exercise of exercises) {
+    const current = grouped.get(exercise.muscleGroup) ?? [];
+    current.push(exercise);
+    grouped.set(exercise.muscleGroup, current);
+  }
+  const blocks = MUSCLE_GROUPS.filter((key) => grouped.has(key));
+  return (
+    <>
+      {blocks.map((muscle) => (
+        <section className="muscle-block" key={muscle}>
+          <p className="eyebrow">{MUSCLE_LABELS[muscle]}</p>
+          <ul className="plain-list exercise-list">
+            {(grouped.get(muscle) ?? []).map((exercise) => (
+              <li key={exercise.id}>
+                <strong>{exercise.exerciseName}</strong>
+                <span>
+                  {exercise.targetSets}×{exercise.targetReps} · {exercise.targetRestSeconds}s
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </>
+  );
+}
+
+export function RoutineOutline({ exercises, cards = false }: { exercises: RoutineExercise[]; cards?: boolean }) {
   const days = routineDays(exercises);
   const named = days.length > 1 || Boolean(days[0]?.label);
+  if (cards) {
+    return (
+      <div className="day-board">
+        {days.map((day) => (
+          <section className="session-card day-card" key={day.dayNumber}>
+            <p className="eyebrow">Día {day.dayNumber}</p>
+            {day.label ? <h2>{day.label}</h2> : null}
+            <DayExercises exercises={day.exercises} />
+          </section>
+        ))}
+      </div>
+    );
+  }
   return (
     <div className="stack">
-      {days.map((day) => {
-        const grouped = new Map<string, RoutineExercise[]>();
-        for (const exercise of day.exercises) {
-          const current = grouped.get(exercise.muscleGroup) ?? [];
-          current.push(exercise);
-          grouped.set(exercise.muscleGroup, current);
-        }
-        const blocks = MUSCLE_GROUPS.filter((key) => grouped.has(key));
-        return (
-          <div className="day-log" key={day.dayNumber}>
-            {named ? <h3 className="day-log-title">{dayTitle(day)}</h3> : null}
-            {blocks.map((muscle) => (
-              <section className="muscle-block" key={muscle}>
-                <p className="eyebrow">{MUSCLE_LABELS[muscle]}</p>
-                <ul className="plain-list exercise-list">
-                  {(grouped.get(muscle) ?? []).map((exercise) => (
-                    <li key={exercise.id}>
-                      <strong>{exercise.exerciseName}</strong>
-                      <span>
-                        {exercise.targetSets}×{exercise.targetReps} · {exercise.targetRestSeconds}s
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ))}
-          </div>
-        );
-      })}
+      {days.map((day) => (
+        <div className="day-log" key={day.dayNumber}>
+          {named ? <h3 className="day-log-title">{dayTitle(day)}</h3> : null}
+          <DayExercises exercises={day.exercises} />
+        </div>
+      ))}
     </div>
   );
 }
