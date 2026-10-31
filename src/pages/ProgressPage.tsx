@@ -3,7 +3,6 @@ import { useSearchParams } from "react-router-dom";
 import { api } from "../api/client";
 import {
   formatDate,
-  formatKg,
   shiftIso,
   todayIso,
   type CalendarDay,
@@ -233,13 +232,17 @@ export function ProgressPage() {
       <section className="session-card">
         <h2>Marcas personales</h2>
         {summary && summary.records.length > 0 ? (
-          <ul className="plain-list exercise-list">
+          <ul className="record-list">
             {summary.records.map((record) => (
               <li key={record.exerciseId}>
-                <strong>{record.exerciseName}</strong>
-                <span>
-                  {formatKg(record.maxWeightKg)} · {formatDate(record.achievedAt.slice(0, 10))}
-                </span>
+                <div className="record-copy">
+                  <strong>{record.exerciseName}</strong>
+                  <span>{formatDate(record.achievedAt.slice(0, 10))}</span>
+                </div>
+                <p className="record-kg">
+                  {new Intl.NumberFormat("es-AR", { maximumFractionDigits: 2 }).format(Number(record.maxWeightKg))}
+                  <small>kg</small>
+                </p>
               </li>
             ))}
           </ul>
