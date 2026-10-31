@@ -67,14 +67,7 @@ export function MyRoutinesPage() {
             const routine = routines[assignment.routineId];
             return (
               <div className="routine-block" key={assignment.id}>
-                <div className="routine-card-head">
-                  <strong>{assignment.routineTitle}</strong>
-                  {assignment.customStudent ? (
-                    <span className="pill custom">Personalizada por el alumno</span>
-                  ) : (
-                    <span className="pill on">Profesor</span>
-                  )}
-                </div>
+                <p className="routine-block-title">{assignment.routineTitle}</p>
                 <p className="cell-note">
                   Desde {formatDate(assignment.startDate)}
                   {assignment.expirationDate ? ` hasta ${formatDate(assignment.expirationDate)}` : " · sin vencimiento"}
@@ -87,18 +80,11 @@ export function MyRoutinesPage() {
             );
           })
         )}
-      </section>
-
-      <section className="session-card">
-        <h2>Rutina propia</h2>
-        <p className="lede">
-          Si querés, podés armarte una rutina con el catálogo del gimnasio. Queda marcada como personalizada.
-        </p>
-        <div className="form-actions">
-          <Link className="btn-ghost" to="/alumno/mis-rutinas/nueva">
+        <p className="routine-own">
+          <Link className="text-btn" to="/alumno/mis-rutinas/nueva">
             Crear rutina propia
           </Link>
-        </div>
+        </p>
       </section>
     </>
   );

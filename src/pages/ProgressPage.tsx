@@ -212,6 +212,76 @@ export function ProgressPage() {
       </section>
 
       <section className="session-card">
+        <MonthCalendar
+          year={year}
+          month={month}
+          days={days}
+          onShift={shiftMonth}
+          selectedDate={selectedDate}
+          onSelect={(date) => {
+            if (date > todayIso()) {
+              return;
+            }
+            setSelectedDate(date);
+          }}
+          maxDate={todayIso()}
+        />
+        <p className="hint left">Tocá un día para cargar el presente. Podés hacerlo hasta 7 días hacia atrás.</p>
+        {selected ? <CalendarPresent day={selected} marking={marking} onMark={markPresent} /> : null}
+      </section>
+
+      <section className="session-card">
+        <h2>Marcas personales</h2>
+        {summary && summary.records.length > 0 ? (
+          <ul className="plain-list exercise-list">
+            {summary.records.map((record) => (
+              <li key={record.exerciseId}>
+                <strong>{record.exerciseName}</strong>
+                <span>
+                  {formatKg(record.maxWeightKg)} · {formatDate(record.achievedAt.slice(0, 10))}
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="lede">Todavía no hay récords de peso.</p>
+        )}
+      </section>
+
+      <section className="session-card">
+        <h2>Evolución por ejercicio</h2>
+        <label className="field">
+          <span className="field-label">Ejercicio</span>
+          <select value={exerciseId} onChange={(event) => setExerciseId(event.target.value)}>
+            {exercises.length === 0 ? <option value="">Sin ejercicios</option> : null}
+            {exercises.map((exercise) => (
+              <option key={exercise.id} value={exercise.id}>
+                {exercise.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <div className="gym-charts">
+          <div>
+            <h3>Peso máximo</h3>
+            <LineChart
+              label="Peso máximo por día"
+              unit="kg"
+              points={points.map((point) => ({ label: formatDate(point.date), value: Number(point.maxWeightKg) }))}
+            />
+          </div>
+          <div>
+            <h3>Volumen</h3>
+            <LineChart
+              label="Volumen por día"
+              unit="kg"
+              points={points.map((point) => ({ label: formatDate(point.date), value: Number(point.volumeKg) }))}
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className="session-card">
         <h2>Peso corporal</h2>
         {staff ? null : (
           <form
@@ -292,76 +362,6 @@ export function ProgressPage() {
           unit="kg"
           points={weights.map((item) => ({ label: formatDate(item.recordedOn), value: Number(item.weightKg) }))}
         />
-      </section>
-
-      <section className="session-card">
-        <h2>Evolución por ejercicio</h2>
-        <label className="field">
-          <span className="field-label">Ejercicio</span>
-          <select value={exerciseId} onChange={(event) => setExerciseId(event.target.value)}>
-            {exercises.length === 0 ? <option value="">Sin ejercicios</option> : null}
-            {exercises.map((exercise) => (
-              <option key={exercise.id} value={exercise.id}>
-                {exercise.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <div className="gym-charts">
-          <div>
-            <h3>Peso máximo</h3>
-            <LineChart
-              label="Peso máximo por día"
-              unit="kg"
-              points={points.map((point) => ({ label: formatDate(point.date), value: Number(point.maxWeightKg) }))}
-            />
-          </div>
-          <div>
-            <h3>Volumen</h3>
-            <LineChart
-              label="Volumen por día"
-              unit="kg"
-              points={points.map((point) => ({ label: formatDate(point.date), value: Number(point.volumeKg) }))}
-            />
-          </div>
-        </div>
-      </section>
-
-      <section className="session-card">
-        <MonthCalendar
-          year={year}
-          month={month}
-          days={days}
-          onShift={shiftMonth}
-          selectedDate={selectedDate}
-          onSelect={(date) => {
-            if (date > todayIso()) {
-              return;
-            }
-            setSelectedDate(date);
-          }}
-          maxDate={todayIso()}
-        />
-        <p className="hint left">Tocá un día para cargar el presente. Podés hacerlo hasta 7 días hacia atrás.</p>
-        {selected ? <CalendarPresent day={selected} marking={marking} onMark={markPresent} /> : null}
-      </section>
-
-      <section className="session-card">
-        <h2>Marcas personales</h2>
-        {summary && summary.records.length > 0 ? (
-          <ul className="plain-list">
-            {summary.records.map((record) => (
-              <li key={record.exerciseId}>
-                <strong>{record.exerciseName}</strong>
-                <span>
-                  {formatKg(record.maxWeightKg)} · {formatDate(record.achievedAt.slice(0, 10))}
-                </span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="lede">Todavía no hay récords de peso.</p>
-        )}
       </section>
     </>
   );

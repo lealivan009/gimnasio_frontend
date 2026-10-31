@@ -1783,10 +1783,31 @@ textarea {
   gap: 2px;
 }
 
+.routine-block-title {
+  margin: 2px 0 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.routine-block .lede {
+  margin: 10px 0 0;
+}
+
 .routine-block + .routine-block {
   margin-top: 18px;
   padding-top: 18px;
   border-top: 1px solid var(--line);
+}
+
+.routine-own {
+  margin: 18px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.routine-own .text-btn {
+  font-size: 14px;
 }
 
 .home-brief {
