@@ -11,6 +11,10 @@ function formatDateTime(value: string | null) {
   return new Date(value).toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" });
 }
 
+function attendanceDate(value: string) {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Argentina/Buenos_Aires" }).format(new Date(value));
+}
+
 export function StudentsFollowPage() {
   const [students, setStudents] = useState<StudentFollow[]>([]);
   const [inside, setInside] = useState<Attendance[]>([]);
@@ -115,6 +119,9 @@ export function StudentsFollowPage() {
               <tbody>
                 {students.map((student) => {
                   const isInside = inside.some((person) => person.studentId === student.id);
+                  const presentToday =
+                    student.lastCheckIn != null &&
+                    attendanceDate(student.lastCheckIn) === attendanceDate(new Date().toISOString());
                   return (
                   <tr key={student.id}>
                     <td>
@@ -146,14 +153,18 @@ export function StudentsFollowPage() {
                     <td>{formatDateTime(student.lastCheckIn)}</td>
                     <td>{student.attendanceLast30Days}</td>
                     <td className="actions">
-                      <button
-                        type="button"
-                        className={isInside ? "btn-ghost" : "btn-primary btn-inline"}
-                        disabled={busyId === student.id}
-                        onClick={() => mark(student.id, isInside ? "out" : "in")}
-                      >
-                        {isInside ? "Marcar salida" : "Dar presente"}
-                      </button>
+                      {presentToday && !isInside ? (
+                        <span className="pill on">Presente</span>
+                      ) : (
+                        <button
+                          type="button"
+                          className={isInside ? "btn-ghost" : "btn-primary btn-inline"}
+                          disabled={busyId === student.id}
+                          onClick={() => mark(student.id, isInside ? "out" : "in")}
+                        >
+                          {isInside ? "Marcar salida" : "Dar presente"}
+                        </button>
+                      )}
                       <Link className="text-btn" to={`/admin/progreso?alumno=${student.id}`}>
                         Ver progreso
                       </Link>

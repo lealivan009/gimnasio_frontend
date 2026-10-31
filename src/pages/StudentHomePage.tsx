@@ -212,24 +212,18 @@ export function StudentHomePage() {
             <p className="eyebrow">Asistencia</p>
             <p>{presentLabel}</p>
           </div>
-          <div className="form-actions">
-            <button
-              type="button"
-              className="btn-primary btn-inline"
-              disabled={busyId === "in" || Boolean(attendance && !attendance.checkOutTime)}
-              onClick={() => runAction("in", async () => { await api.checkIn(); setNotice("Ingreso registrado"); })}
-            >
-              Registrar ingreso
-            </button>
-            <button
-              type="button"
-              className="btn-ghost"
-              disabled={busyId === "out" || !attendance || Boolean(attendance.checkOutTime)}
-              onClick={() => runAction("out", async () => { await api.checkOut(); setNotice("Salida registrada"); })}
-            >
-              Registrar salida
-            </button>
-          </div>
+          {attendance ? null : (
+            <div className="form-actions">
+              <button
+                type="button"
+                className="btn-primary btn-inline"
+                disabled={busyId === "in"}
+                onClick={() => runAction("in", async () => { await api.checkIn(); setNotice("Presente registrado"); })}
+              >
+                Marcar presente
+              </button>
+            </div>
+          )}
           <p className="hint left">Si te olvidaste un día de esta semana, marcalo en Progreso.</p>
         </div>
       </section>
