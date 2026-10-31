@@ -1916,6 +1916,24 @@ textarea {
   font-size: 14px;
 }
 
+.home-routine-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.home-routine-row .eyebrow,
+.home-routine-row .cell-note {
+  margin: 0;
+}
+
+.home-routine-row .cell-note {
+  flex: 0 0 auto;
+  text-align: right;
+  white-space: nowrap;
+}
+
 .home-routine-meta {
   display: flex;
   flex-wrap: wrap;

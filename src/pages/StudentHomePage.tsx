@@ -287,23 +287,14 @@ export function StudentHomePage() {
       ) : null}
 
       <section className="session-card">
-        <p className="eyebrow">Rutina activa</p>
+        <div className="home-routine-row">
+          <p className="eyebrow">Rutina activa</p>
+          {active?.assignment?.expirationDate ? (
+            <p className="cell-note">Vence el {formatDate(active.assignment.expirationDate)}</p>
+          ) : null}
+        </div>
         {active?.routine && active.assignment ? (
-          <>
-            <h2 className="home-routine-title">{active.routine.title}</h2>
-            <div className="home-routine-meta">
-              {active.routine.customStudent ? (
-                <span className="pill custom">Personalizada</span>
-              ) : (
-                <span className="pill on">Profesor</span>
-              )}
-              <p>
-                {active.assignment.expirationDate
-                  ? `Vence el ${active.assignment.expirationDate.split("-").reverse().join("/")}`
-                  : "Sin vencimiento"}
-              </p>
-            </div>
-          </>
+          <h2 className="home-routine-title">{active.routine.title}</h2>
         ) : (
           <>
             <p className="lede">No tenés una rutina activa para hoy.</p>
@@ -316,6 +307,7 @@ export function StudentHomePage() {
         )}
 
         <MonthCalendar
+          heading=""
           year={year}
           month={month}
           days={calendarDays}
