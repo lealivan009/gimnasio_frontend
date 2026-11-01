@@ -73,10 +73,7 @@ body,
 body {
   margin: 0;
   font-family: var(--font);
-  background:
-    radial-gradient(1100px 520px at 8% -8%, var(--glow), transparent 55%),
-    radial-gradient(900px 480px at 100% 0%, rgba(255, 255, 255, 0.05), transparent 50%),
-    var(--bg);
+  background: var(--bg);
   color: var(--text);
 }
 
@@ -95,10 +92,7 @@ a:hover {
   min-height: 100vh;
   padding: 36px clamp(28px, 6vw, 88px) 72px;
   overflow: hidden;
-  background:
-    radial-gradient(720px 420px at 88% -8%, var(--glow), transparent 60%),
-    radial-gradient(540px 360px at 0% 12%, var(--glow), transparent 55%),
-    var(--bg);
+  background: var(--bg);
 }
 
 .landing-frame {
@@ -196,9 +190,7 @@ a:hover {
 }
 
 .landing-today {
-  background:
-    linear-gradient(160deg, var(--accent-soft), transparent 58%),
-    var(--bg-elev);
+  background: var(--bg-elev);
   border: 1px solid var(--line);
   border-radius: 28px;
   padding: 26px 26px 22px;
@@ -322,10 +314,7 @@ a:hover {
   justify-content: space-between;
   gap: 28px;
   border-right: 1px solid var(--line);
-  background:
-    radial-gradient(520px 280px at 0% 0%, var(--glow), transparent 70%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 32%),
-    var(--bg);
+  background: var(--bg);
 }
 
 .brand-top {
