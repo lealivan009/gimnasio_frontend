@@ -18,12 +18,14 @@ import {
   type CalendarDay,
   type ClassSchedule,
   type Occupancy,
+  type OpeningHour,
   type OperatingMode,
   type RoutineExercise,
   type WorkoutLog,
 } from "../api/gym";
 import { MonthCalendar } from "../components/MonthCalendar";
 import { Toast } from "../components/Toast";
+import { weekdayIndex } from "../gym/hours";
 
 function monthStart(year: number, month: number) {
   return `${year}-${String(month).padStart(2, "0")}-01`;
@@ -42,6 +44,7 @@ export function StudentHomePage() {
   const today = todayIso();
   const [mode, setMode] = useState<OperatingMode | null>(null);
   const [occupancy, setOccupancy] = useState<Occupancy | null>(null);
+  const [hours, setHours] = useState<OpeningHour[] | null>(null);
   const [classes, setClasses] = useState<ClassSchedule[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [active, setActive] = useState<ActiveRoutine | null>(null);
@@ -81,6 +84,7 @@ export function StudentHomePage() {
         api.listWorkouts({ from: monthStart(year, month), to: monthEnd(year, month) }),
       ]);
     setMode(config.operatingMode);
+    setHours(config.hours ?? []);
     setOccupancy(nextOccupancy);
     setActive(nextActive);
     setLogs(nextLogs);
@@ -174,8 +178,10 @@ export function StudentHomePage() {
     });
   }
 
-  const weekday = DAY_LABELS[new Date().getDay() === 0 ? 7 : new Date().getDay()];
-  const presentLabel =
+  const weekday = DAY_LABELS[weekdayIndex()];
+  const closedToday =
+    hours != null && hours.length > 0 && !hours.some((hour) => hour.dayOfWeek === weekdayIndex());
+  const presentLabel = closedToday && !attendance ? "Hoy no abre" :
     attendance?.checkInTime && !attendance.checkOutTime
       ? "Estás adentro"
       : attendance?.checkInTime
@@ -207,7 +213,7 @@ export function StudentHomePage() {
             <p className="eyebrow">Asistencia</p>
             <p>{presentLabel}</p>
           </div>
-          {attendance ? null : (
+          {attendance || closedToday ? null : (
             <div className="form-actions">
               <button
                 type="button"
@@ -323,7 +329,7 @@ export function StudentHomePage() {
             }
             setSelectedDate(date);
             setError(null);
-            if (date < oldestLogDate) {
+            if (date < oldestLogDate || !presentDates.includes(date)) {
               setLoggingDay(null);
               setChoosingDay(false);
             }
@@ -445,21 +451,24 @@ function TrainingDay({
     sessions.set(number, current);
   }
   const selectedSessions = [...sessions.entries()].sort((a, b) => a[0] - b[0]);
+  const canLoad = present && logDate <= today && logDate >= shiftIso(today, -7);
 
   return (
     <>
-      <div className="form-actions">
-        <button type="button" className="btn-primary btn-inline" onClick={onStart} disabled={logDate > today}>
-          Cargar día
-        </button>
-        {choosingDay || loggingDay != null ? (
-          <button type="button" className="btn-ghost" onClick={onClose}>
-            Cerrar
+      {canLoad ? (
+        <div className="form-actions">
+          <button type="button" className="btn-primary btn-inline" onClick={onStart}>
+            Cargar día
           </button>
-        ) : null}
-      </div>
+          {choosingDay || loggingDay != null ? (
+            <button type="button" className="btn-ghost" onClick={onClose}>
+              Cerrar
+            </button>
+          ) : null}
+        </div>
+      ) : null}
 
-      {choosingDay ? (
+      {canLoad && choosingDay ? (
         <div className="day-choice training-split">
           <p className="lede">¿Qué día estás haciendo? Podés hacer el día 1 un lunes y el día 3 un martes.</p>
           {days.map((day) => (
@@ -470,7 +479,7 @@ function TrainingDay({
         </div>
       ) : null}
 
-      {openDay ? (
+      {openDay && present ? (
         <>
           <h3 className="training-day-title">{sessionName(days, openDay.dayNumber)}</h3>
           <p className="lede">Cargando el {formatDate(logDate)}.</p>

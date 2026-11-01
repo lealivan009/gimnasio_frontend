@@ -9,6 +9,7 @@ import {
   type Exercise,
   type ProgressPoint,
   type StatsSummary,
+  type OpeningHour,
   type StudentFollow,
   type WeightLog,
 } from "../api/gym";
@@ -44,15 +45,17 @@ export function ProgressPage() {
   const [marking, setMarking] = useState(false);
   const [revision, setRevision] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [hours, setHours] = useState<OpeningHour[] | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     async function run() {
       try {
-        const catalog = await api.listExercises();
+        const [catalog, config] = await Promise.all([api.listExercises(), api.getGymConfig()]);
         if (cancelled) {
           return;
         }
+        setHours(config.hours ?? []);
         setExercises(catalog);
         setExerciseId((current) => current || catalog[0]?.id || "");
         if (staff) {
@@ -194,7 +197,9 @@ export function ProgressPage() {
           maxDate={todayIso()}
         />
         <p className="hint left">Tocá un día para cargar el presente. Podés hacerlo hasta 7 días hacia atrás.</p>
-        {selected ? <CalendarPresent day={selected} marking={marking} onMark={markPresent} /> : null}
+        {selected ? (
+          <CalendarPresent day={selected} marking={marking} closed={gymClosed(selected.date, hours)} onMark={markPresent} />
+        ) : null}
       </section>
 
       <section className="session-card">
@@ -330,13 +335,28 @@ export function ProgressPage() {
   );
 }
 
+function weekdayOf(iso: string) {
+  const date = new Date(`${iso}T12:00:00`);
+  return date.getDay() === 0 ? 7 : date.getDay();
+}
+
+function gymClosed(iso: string, hours: OpeningHour[] | null) {
+  if (!hours || hours.length === 0) {
+    return false;
+  }
+  const day = weekdayOf(iso);
+  return !hours.some((hour) => hour.dayOfWeek === day);
+}
+
 function CalendarPresent({
   day,
   marking,
+  closed,
   onMark,
 }: {
   day: CalendarDay;
   marking: boolean;
+  closed: boolean;
   onMark: () => void;
 }) {
   const today = todayIso();
@@ -346,6 +366,9 @@ function CalendarPresent({
   }
   if (day.date > today) {
     return <p className="lede">Ese día todavía no llegó.</p>;
+  }
+  if (closed) {
+    return <p className="lede">Ese día el gimnasio está cerrado.</p>;
   }
   if (day.date < oldest) {
     return <p className="lede">Ese día queda afuera de los 7 días.</p>;
