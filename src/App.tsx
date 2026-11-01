@@ -17,6 +17,7 @@ import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
 import { CreateRoutinePage } from "./pages/CreateRoutinePage";
 import { MyRoutinesPage } from "./pages/MyRoutinesPage";
+import { ProfileEditPage } from "./pages/ProfileEditPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { ProgressPage } from "./pages/ProgressPage";
 import { RegisterPage } from "./pages/RegisterPage";
@@ -50,6 +51,7 @@ export function App() {
         <Route element={<AppShell />}>
           <Route path="/app" element={<HomePage />} />
           <Route path="/app/profile" element={<ProfilePage />} />
+          <Route path="/app/profile/editar" element={<ProfileEditPage />} />
           <Route path="/app/account" element={<AccountPage />} />
           <Route path="/cronometro" element={<TimerGate />} />
           <Route element={<AdminRoute />}>

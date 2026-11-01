@@ -100,8 +100,8 @@ export function HomePage() {
               <span className="progress-fill" style={{ width: `${score}%` }} />
             </div>
           </div>
-          <Link className="btn-primary btn-inline" to="/app/profile">
-            Ir al perfil
+          <Link className="btn-primary btn-inline" to="/app/profile/editar">
+            Completar datos
           </Link>
         </section>
       ) : null}
