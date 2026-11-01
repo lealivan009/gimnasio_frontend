@@ -243,10 +243,9 @@ export function SchedulesPage() {
                   role="radio"
                   aria-checked={selected}
                   className={selected ? "theme-card is-selected" : "theme-card"}
-                  data-theme={theme.toLowerCase()}
+                  data-swatch={theme.toLowerCase()}
                   onClick={() => setConfig({ ...config, theme })}
                 >
-                  <span className="theme-swatch" aria-hidden />
                   {THEME_LABELS[theme]}
                 </button>
               );
