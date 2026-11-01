@@ -382,7 +382,7 @@ export function RoutineOutline({ exercises, cards = false }: { exercises: Routin
       <div className="day-board">
         {days.map((day) => (
           <section className="session-card day-card" key={day.dayNumber}>
-            <p className="eyebrow">Día {day.dayNumber}</p>
+            <p className="day-index">Día {day.dayNumber}</p>
             {day.label ? <h2>{day.label}</h2> : null}
             <DayExercises exercises={day.exercises} />
           </section>

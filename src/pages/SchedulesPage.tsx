@@ -231,19 +231,28 @@ export function SchedulesPage() {
             placeholder="https://www.google.com/maps/embed?..."
           />
         </label>
-        <label className="field">
+        <div className="field">
           <span className="field-label">Color</span>
-          <select
-            value={config.theme ?? "ENERGIA"}
-            onChange={(event) => setConfig({ ...config, theme: event.target.value as GymTheme })}
-          >
-            {(Object.keys(THEME_LABELS) as GymTheme[]).map((theme) => (
-              <option key={theme} value={theme}>
-                {THEME_LABELS[theme]}
-              </option>
-            ))}
-          </select>
-        </label>
+          <div className="theme-picker" role="radiogroup" aria-label="Color">
+            {(Object.keys(THEME_LABELS) as GymTheme[]).map((theme) => {
+              const selected = (config.theme ?? "ENERGIA") === theme;
+              return (
+                <button
+                  key={theme}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  className={selected ? "theme-card is-selected" : "theme-card"}
+                  data-theme={theme.toLowerCase()}
+                  onClick={() => setConfig({ ...config, theme })}
+                >
+                  <span className="theme-swatch" aria-hidden />
+                  {THEME_LABELS[theme]}
+                </button>
+              );
+            })}
+          </div>
+        </div>
         <label className="field">
           <span className="field-label">Funcionamiento</span>
           <select

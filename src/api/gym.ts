@@ -36,13 +36,14 @@ export const STATUS_LABELS: Record<BookingStatus, string> = {
   ASISTIO: "Asistió",
 };
 
-export type GymTheme = "ENERGIA" | "NEON" | "DEPORTE" | "ELECTRICO";
+export type GymTheme = "ENERGIA" | "NEON" | "DEPORTE" | "ELECTRICO" | "ROSA";
 
 export const THEME_LABELS: Record<GymTheme, string> = {
   ENERGIA: "Naranja",
   NEON: "Lima neón",
   DEPORTE: "Rojo",
   ELECTRICO: "Amarillo",
+  ROSA: "Rosa",
 };
 
 export interface OpeningHour {
