@@ -40,6 +40,15 @@ function attendanceDate(value: string) {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Argentina/Buenos_Aires" }).format(new Date(value));
 }
 
+function dayClosed(iso: string, hours: OpeningHour[] | null) {
+  if (!hours || hours.length === 0) {
+    return false;
+  }
+  const date = new Date(`${iso}T12:00:00`);
+  const day = date.getDay() === 0 ? 7 : date.getDay();
+  return !hours.some((hour) => hour.dayOfWeek === day);
+}
+
 export function StudentHomePage() {
   const today = todayIso();
   const [mode, setMode] = useState<OperatingMode | null>(null);
@@ -341,8 +350,29 @@ export function StudentHomePage() {
             ? "Ese día todavía no llegó."
             : selectedDate && selectedDate < oldestLogDate
               ? "Ese día queda afuera de los 7 días. Podés verlo, pero no cargarlo."
-              : "Tocá un día del calendario para elegir la fecha. Podés cargar hasta 7 días hacia atrás."}
+              : "Tocá un día para marcarlo. El presente y el entrenamiento se pueden cargar hasta 7 días hacia atrás."}
         </p>
+        {logDate < today && logDate >= oldestLogDate && !presentDates.includes(logDate) ? (
+          dayClosed(logDate, hours) ? (
+            <p className="lede">Ese día el gimnasio está cerrado.</p>
+          ) : (
+            <div className="form-actions">
+              <button
+                type="button"
+                className="btn-primary btn-inline"
+                disabled={busyId === "past"}
+                onClick={() =>
+                  runAction("past", async () => {
+                    await api.checkIn(logDate);
+                    setNotice("Presente cargado");
+                  })
+                }
+              >
+                {busyId === "past" ? "Guardando…" : `Marcar presente · ${formatDate(logDate)}`}
+              </button>
+            </div>
+          )
+        ) : null}
 
         {active?.routine && active.assignment ? (
           <TrainingDay

@@ -3,13 +3,11 @@ import { useSearchParams } from "react-router-dom";
 import { api } from "../api/client";
 import {
   formatDate,
-  shiftIso,
   todayIso,
   type CalendarDay,
   type Exercise,
   type ProgressPoint,
   type StatsSummary,
-  type OpeningHour,
   type StudentFollow,
   type WeightLog,
 } from "../api/gym";
@@ -41,21 +39,16 @@ export function ProgressPage() {
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [marking, setMarking] = useState(false);
-  const [revision, setRevision] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [hours, setHours] = useState<OpeningHour[] | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     async function run() {
       try {
-        const [catalog, config] = await Promise.all([api.listExercises(), api.getGymConfig()]);
+        const catalog = await api.listExercises();
         if (cancelled) {
           return;
         }
-        setHours(config.hours ?? []);
         setExercises(catalog);
         setExerciseId((current) => current || catalog[0]?.id || "");
         if (staff) {
@@ -120,7 +113,7 @@ export function ProgressPage() {
     return () => {
       cancelled = true;
     };
-  }, [staff, studentId, exerciseId, year, month, revision]);
+  }, [staff, studentId, exerciseId, year, month]);
 
   function shiftMonth(delta: number) {
     const next = new Date(year, month - 1 + delta, 1);
@@ -129,39 +122,12 @@ export function ProgressPage() {
   }
 
   const today = todayIso();
-  const oldestPresent = shiftIso(today, -7);
-  const selected = days.find((day) => day.date === selectedDate) ?? null;
-
-  async function markPresent() {
-    if (!selected || selected.attended || selected.date > today || selected.date < oldestPresent) {
-      return;
-    }
-    if (staff && !studentId) {
-      return;
-    }
-    setMarking(true);
-    setError(null);
-    setNotice(null);
-    try {
-      const past = selected.date === today ? undefined : selected.date;
-      if (staff) {
-        await api.staffCheckIn(studentId, past);
-      } else {
-        await api.checkIn(past);
-      }
-      setNotice("Presente cargado");
-      setRevision((value) => value + 1);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "No se pudo marcar el presente");
-    } finally {
-      setMarking(false);
-    }
-  }
 
   return (
     <>
-      <section className="session-card">
-        {staff ? (
+      <Toast message={notice} onClose={() => setNotice(null)} />
+      {staff ? (
+        <section className="session-card">
           <label className="field">
             <span className="field-label">Alumno</span>
             <select
@@ -178,29 +144,10 @@ export function ProgressPage() {
               ))}
             </select>
           </label>
-        ) : null}
-        {error ? <p className="alert">{error}</p> : null}
-        <Toast message={notice} onClose={() => setNotice(null)} />
-        {loading && days.length === 0 ? <p className="lede">Cargando…</p> : null}
-        <MonthCalendar
-          year={year}
-          month={month}
-          days={days}
-          onShift={shiftMonth}
-          selectedDate={selectedDate}
-          onSelect={(date) => {
-            if (date > todayIso()) {
-              return;
-            }
-            setSelectedDate(date);
-          }}
-          maxDate={todayIso()}
-        />
-        <p className="hint left">Tocá un día para cargar el presente. Podés hacerlo hasta 7 días hacia atrás.</p>
-        {selected ? (
-          <CalendarPresent day={selected} marking={marking} closed={gymClosed(selected.date, hours)} onMark={markPresent} />
-        ) : null}
-      </section>
+        </section>
+      ) : null}
+      {error ? <p className="alert">{error}</p> : null}
+      {loading && !summary ? <p className="lede">Cargando…</p> : null}
 
       <section className="session-card">
         <h2>Marcas personales</h2>
@@ -335,47 +282,3 @@ export function ProgressPage() {
   );
 }
 
-function weekdayOf(iso: string) {
-  const date = new Date(`${iso}T12:00:00`);
-  return date.getDay() === 0 ? 7 : date.getDay();
-}
-
-function gymClosed(iso: string, hours: OpeningHour[] | null) {
-  if (!hours || hours.length === 0) {
-    return false;
-  }
-  const day = weekdayOf(iso);
-  return !hours.some((hour) => hour.dayOfWeek === day);
-}
-
-function CalendarPresent({
-  day,
-  marking,
-  closed,
-  onMark,
-}: {
-  day: CalendarDay;
-  marking: boolean;
-  closed: boolean;
-  onMark: () => void;
-}) {
-  const today = todayIso();
-  const oldest = shiftIso(today, -7);
-  if (day.attended) {
-    return <p className="lede">{formatDate(day.date)} ya tiene el presente.</p>;
-  }
-  if (day.date > today) {
-    return <p className="lede">Ese día todavía no llegó.</p>;
-  }
-  if (closed) {
-    return <p className="lede">Ese día el gimnasio está cerrado.</p>;
-  }
-  if (day.date < oldest) {
-    return <p className="lede">Ese día queda afuera de los 7 días.</p>;
-  }
-  return (
-    <button className="btn-primary btn-inline" type="button" disabled={marking} onClick={onMark}>
-      {marking ? "Guardando…" : `Marcar presente · ${formatDate(day.date)}`}
-    </button>
-  );
-}
