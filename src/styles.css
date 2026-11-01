@@ -1548,9 +1548,12 @@ a.btn-ghost {
 
   .landing-stage,
   .landing-place,
-  .landing-perks,
   .landing .hours-board {
     grid-template-columns: 1fr;
+  }
+
+  .landing-perks {
+    display: none;
   }
 
   .landing-hero h1 {
@@ -2000,6 +2003,31 @@ textarea {
 .session-card h3.day-log-title {
   margin: 18px 0 0;
   font-size: 1.05rem;
+}
+
+.load-day {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.load-day p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.load-day .text-btn {
+  font-size: 14px;
+}
+
+.session-card .load-day + .stack .day-log-title,
+.session-card .load-day + .training-day-title {
+  margin-top: 10px;
+  padding-top: 0;
+  border-top: 0;
 }
 
 .day-board {

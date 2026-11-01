@@ -482,17 +482,16 @@ function TrainingDay({
   }
   const selectedSessions = [...sessions.entries()].sort((a, b) => a[0] - b[0]);
   const canLoad = present && logDate <= today && logDate >= shiftIso(today, -7);
+  const editing = choosingDay || loggingDay != null;
 
   return (
     <>
-      {canLoad ? (
-        <div className="form-actions">
-          <button type="button" className="btn-primary btn-inline" onClick={onStart}>
-            Cargar día
-          </button>
-          {choosingDay || loggingDay != null ? (
-            <button type="button" className="btn-ghost" onClick={onClose}>
-              Cerrar
+      {canLoad || selectedSessions.length > 0 ? (
+        <div className="load-day">
+          <p>{selectedDate ? formatDate(selectedDate) : ""}</p>
+          {canLoad ? (
+            <button type="button" className="text-btn" onClick={editing ? onClose : onStart}>
+              {editing ? "Cerrar" : "Cargar día"}
             </button>
           ) : null}
         </div>
@@ -512,18 +511,9 @@ function TrainingDay({
       {openDay && present ? (
         <>
           <h3 className="training-day-title">{sessionName(days, openDay.dayNumber)}</h3>
-          <p className="lede">Cargando el {formatDate(logDate)}.</p>
-          {present ? (
-            <p className="hint left">
-              Esfuerzo es opcional, del 1 al 10: 1 es muy fácil y 10 es que no podrías hacer otra repetición.
-            </p>
-          ) : (
-            <p className="lede">
-              {logDate === today
-                ? "Marcá el presente de hoy para anotar las series."
-                : "Marcá el presente de ese día en Progreso para anotar las series."}
-            </p>
-          )}
+          <p className="hint left">
+            Esfuerzo es opcional, del 1 al 10: 1 es muy fácil y 10 es que no podrías hacer otra repetición.
+          </p>
           <div className="stack">
             {openDay.exercises.map((exercise) => {
               const done = logs
@@ -613,13 +603,9 @@ function TrainingDay({
         </>
       ) : choosingDay ? null : (
         <div className="stack">
-          <p className="lede">
-            {selectedSessions.length === 0
-              ? selectedDate === today
-                ? "Hoy todavía no cargaste el entrenamiento."
-                : `El ${formatDate(selectedDate)} no hay entrenamiento cargado.`
-              : formatDate(selectedDate)}
-          </p>
+          {selectedSessions.length === 0 ? (
+            <p className="lede">Todavía no hay ejercicios cargados.</p>
+          ) : null}
           {selectedSessions.map(([number, session]) => (
             <DayLog
               key={number}
