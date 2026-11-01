@@ -1122,46 +1122,50 @@ textarea:focus {
 .theme-card {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 10px;
   min-height: 56px;
   padding: 10px 12px;
   border-radius: 16px;
-  border: 0;
-  background: var(--swatch);
-  color: var(--swatch-ink);
+  border: 1px solid var(--line);
+  background: var(--bg-elev);
+  color: var(--text);
   font: inherit;
   font-size: 14px;
-  font-weight: 600;
+  text-align: left;
   cursor: pointer;
 }
 
 .theme-card[data-swatch="energia"] {
   --swatch: #ff6a1a;
-  --swatch-ink: #1a1008;
 }
 
 .theme-card[data-swatch="neon"] {
   --swatch: #c6f135;
-  --swatch-ink: #141a08;
 }
 
 .theme-card[data-swatch="deporte"] {
   --swatch: #ff2d3a;
-  --swatch-ink: #fff5f5;
 }
 
 .theme-card[data-swatch="electrico"] {
   --swatch: #ffe14a;
-  --swatch-ink: #1c1806;
 }
 
 .theme-card[data-swatch="rosa"] {
   --swatch: #ff4f93;
-  --swatch-ink: #1a0a10;
 }
 
 .theme-card.is-selected {
-  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--swatch);
+  border-color: var(--swatch);
+  box-shadow: 0 0 0 1px var(--swatch);
+}
+
+.theme-swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  background: var(--swatch);
 }
 
 .form-actions {

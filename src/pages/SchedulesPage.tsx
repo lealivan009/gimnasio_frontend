@@ -246,6 +246,7 @@ export function SchedulesPage() {
                   data-swatch={theme.toLowerCase()}
                   onClick={() => setConfig({ ...config, theme })}
                 >
+                  <span className="theme-swatch" aria-hidden />
                   {THEME_LABELS[theme]}
                 </button>
               );
