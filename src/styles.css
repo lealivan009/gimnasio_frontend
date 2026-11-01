@@ -1984,6 +1984,12 @@ textarea {
   font-size: 1rem;
 }
 
+.home-occupancy p:not(.eyebrow) {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.2;
+}
+
 .home-attendance {
   display: grid;
   gap: 10px;

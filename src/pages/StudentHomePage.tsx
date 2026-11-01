@@ -17,7 +17,6 @@ import {
   type Booking,
   type CalendarDay,
   type ClassSchedule,
-  type Occupancy,
   type OpeningHour,
   type OperatingMode,
   type RoutineExercise,
@@ -52,7 +51,6 @@ function dayClosed(iso: string, hours: OpeningHour[] | null) {
 export function StudentHomePage() {
   const today = todayIso();
   const [mode, setMode] = useState<OperatingMode | null>(null);
-  const [occupancy, setOccupancy] = useState<Occupancy | null>(null);
   const [hours, setHours] = useState<OpeningHour[] | null>(null);
   const [classes, setClasses] = useState<ClassSchedule[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -81,9 +79,8 @@ export function StudentHomePage() {
   async function reload() {
     const config = await api.getGymConfig();
     const acceptsClasses = config.operatingMode !== "FREE_ACCESS";
-    const [nextOccupancy, nextActive, nextLogs, nextAttendance, nextClasses, nextBookings, nextDays, nextMonthLogs] =
+    const [nextActive, nextLogs, nextAttendance, nextClasses, nextBookings, nextDays, nextMonthLogs] =
       await Promise.all([
-        api.getOccupancy(),
         api.getActiveRoutine(),
         api.listWorkouts({ from: logDate, to: logDate }),
         api.listAttendance({ from: oldestLogDate, to: today }),
@@ -94,7 +91,6 @@ export function StudentHomePage() {
       ]);
     setMode(config.operatingMode);
     setHours(config.hours ?? []);
-    setOccupancy(nextOccupancy);
     setActive(nextActive);
     setLogs(nextLogs);
     const dates = [...new Set(nextAttendance.map((item) => attendanceDate(item.checkInTime)))];
@@ -205,24 +201,15 @@ export function StudentHomePage() {
             <p className="eyebrow">{weekday}</p>
             <h1>Hoy</h1>
           </div>
-          {mode !== "CLASS_SCHEDULED" && occupancy ? (
-            <div className="home-occupancy">
-              <p className="eyebrow">Gente ahora</p>
-              <strong>
-                {occupancy.currentOccupancy}
-                <span>/{occupancy.maxCapacity}</span>
-              </strong>
-            </div>
-          ) : null}
-        </div>
-        {error ? <p className="alert">{error}</p> : null}
-        <Toast message={notice} onClose={() => setNotice(null)} />
-        <div className="home-attendance">
-          <div>
+          <div className="home-occupancy">
             <p className="eyebrow">Asistencia</p>
             <p>{presentLabel}</p>
           </div>
-          {attendance || closedToday ? null : (
+        </div>
+        {error ? <p className="alert">{error}</p> : null}
+        <Toast message={notice} onClose={() => setNotice(null)} />
+        {attendance || closedToday ? null : (
+          <div className="home-attendance">
             <div className="form-actions">
               <button
                 type="button"
@@ -233,8 +220,8 @@ export function StudentHomePage() {
                 Marcar presente
               </button>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </section>
 
       {loading ? <p className="lede">Cargando…</p> : null}
