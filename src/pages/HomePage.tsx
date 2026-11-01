@@ -43,8 +43,9 @@ export function HomePage() {
     return <Navigate to="/alumno/inicio" replace />;
   }
 
+  const admin = user.role === "ADMIN";
   const score = profileScore(user);
-  const incomplete = score < 100;
+  const incomplete = score < 100 && !admin;
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Buenos días" : hour < 19 ? "Buenas tardes" : "Buenas noches";
   const hours = gym?.hours ?? [];
@@ -83,11 +84,13 @@ export function HomePage() {
             </strong>
             <p>{open ? "Hay lugar en el piso." : "El ingreso está cerrado en este horario."}</p>
           </article>
-          <article className="session-card stat-card">
-            <p className="eyebrow">Tu rol</p>
-            <strong className="dash-role">{roleLabel(user.role)}</strong>
-            <p>{displayName(user)}</p>
-          </article>
+          {admin ? null : (
+            <article className="session-card stat-card">
+              <p className="eyebrow">Tu rol</p>
+              <strong className="dash-role">{roleLabel(user.role)}</strong>
+              <p>{displayName(user)}</p>
+            </article>
+          )}
         </section>
       ) : null}
 
