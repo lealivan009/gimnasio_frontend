@@ -1998,9 +1998,10 @@ textarea {
 }
 
 .progress-facts {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: flex;
   gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
 }
 
 .progress-facts .eyebrow {
