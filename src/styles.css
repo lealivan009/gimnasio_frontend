@@ -1997,31 +1997,6 @@ textarea {
   margin: 0;
 }
 
-.progress-facts {
-  display: flex;
-  gap: 12px;
-  padding-top: 14px;
-  border-top: 1px solid var(--line);
-}
-
-.progress-facts .eyebrow {
-  margin-bottom: 4px;
-}
-
-.progress-facts strong {
-  display: block;
-  font-family: var(--serif);
-  font-size: 1.7rem;
-  font-weight: 500;
-  line-height: 1;
-}
-
-.progress-facts p:last-child {
-  margin: 4px 0 0;
-  color: var(--muted);
-  font-size: 13px;
-}
-
 .session-card h3.day-log-title {
   margin: 18px 0 0;
   font-size: 1.05rem;

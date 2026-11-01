@@ -125,10 +125,7 @@ export function ProgressPage() {
     setMonth(next.getMonth() + 1);
   }
 
-  const selectedStudent = students.find((student) => student.id === studentId);
   const today = todayIso();
-  const visits = days.filter((day) => day.attended).length;
-  const monthName = new Date(year, month - 1, 1).toLocaleDateString("es-AR", { month: "long" });
   const oldestPresent = shiftIso(today, -7);
   const selected = days.find((day) => day.date === selectedDate) ?? null;
 
@@ -160,11 +157,7 @@ export function ProgressPage() {
 
   return (
     <>
-      <section className="session-card home-brief">
-        <div>
-          <p className="eyebrow">Progreso</p>
-          <h1>{staff ? "Progreso del alumno" : "Tu progreso"}</h1>
-        </div>
+      <section className="session-card">
         {staff ? (
           <label className="field">
             <span className="field-label">Alumno</span>
@@ -183,26 +176,9 @@ export function ProgressPage() {
             </select>
           </label>
         ) : null}
-        {selectedStudent ? (
-          <p className="lede">
-            {selectedStudent.firstName} {selectedStudent.lastName}
-          </p>
-        ) : null}
         {error ? <p className="alert">{error}</p> : null}
         <Toast message={notice} onClose={() => setNotice(null)} />
         {loading && days.length === 0 ? <p className="lede">Cargando…</p> : null}
-        {days.length > 0 ? (
-          <div className="progress-facts">
-            <div>
-              <p className="eyebrow">{monthName}</p>
-              <strong>{visits}</strong>
-              <p>{visits === 1 ? "día" : "días"}</p>
-            </div>
-          </div>
-        ) : null}
-      </section>
-
-      <section className="session-card">
         <MonthCalendar
           year={year}
           month={month}
