@@ -127,6 +127,9 @@ export function ProgressPage() {
 
   const selectedStudent = students.find((student) => student.id === studentId);
   const today = todayIso();
+  const visits = days.filter((day) => day.attended).length;
+  const trainedDays = days.filter((day) => day.trained).length;
+  const monthName = new Date(year, month - 1, 1).toLocaleDateString("es-AR", { month: "long" });
   const oldestPresent = shiftIso(today, -7);
   const selected = days.find((day) => day.date === selectedDate) ?? null;
 
@@ -159,10 +162,6 @@ export function ProgressPage() {
   return (
     <>
       <section className="session-card home-brief">
-        <div>
-          <p className="eyebrow">Progreso</p>
-          <h1>{staff ? "Progreso del alumno" : "Tu progreso"}</h1>
-        </div>
         {staff ? (
           <label className="field">
             <span className="field-label">Alumno</span>
@@ -188,23 +187,18 @@ export function ProgressPage() {
         ) : null}
         {error ? <p className="alert">{error}</p> : null}
         <Toast message={notice} onClose={() => setNotice(null)} />
-        {loading && !summary ? <p className="lede">Cargando…</p> : null}
-        {summary ? (
+        {loading && days.length === 0 ? <p className="lede">Cargando…</p> : null}
+        {days.length > 0 ? (
           <div className="progress-facts">
             <div>
-              <p className="eyebrow">Racha</p>
-              <strong>{summary.weeklyStreak}</strong>
-              <p>semanas</p>
+              <p className="eyebrow">{monthName}</p>
+              <strong>{visits}</strong>
+              <p>{visits === 1 ? "vez que fue" : "veces que fue"}</p>
             </div>
             <div>
-              <p className="eyebrow">Esta semana</p>
-              <strong>{summary.workoutsThisWeek}</strong>
-              <p>series</p>
-            </div>
-            <div>
-              <p className="eyebrow">Asistencia</p>
-              <strong>{summary.attendanceDaysThisMonth}</strong>
-              <p>días del mes</p>
+              <p className="eyebrow">Entrenó</p>
+              <strong>{trainedDays}</strong>
+              <p>{trainedDays === 1 ? "día" : "días"}</p>
             </div>
           </div>
         ) : null}
