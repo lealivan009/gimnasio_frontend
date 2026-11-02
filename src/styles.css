@@ -517,47 +517,6 @@ a.dash-metric:hover {
   font-size: 13px;
 }
 
-.dash-split {
-  display: grid;
-  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
-  gap: 14px;
-  margin-top: 14px;
-}
-
-.dash-split > .session-card + .session-card {
-  margin-top: 0;
-}
-
-.dash-panel h2 {
-  margin: 0;
-  font-size: 1.25rem;
-}
-
-.dash-panel .lede {
-  margin: 12px 0 0;
-}
-
-.dash-list {
-  list-style: none;
-  margin: 14px 0 0;
-  padding: 0;
-  display: grid;
-  gap: 12px;
-}
-
-.dash-list li {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 12px;
-}
-
-.dash-list span {
-  color: var(--muted);
-  font-size: 13px;
-  text-align: right;
-}
-
 .home-tile-index {
   color: var(--accent);
   font-size: 12px;
@@ -1719,8 +1678,7 @@ a.btn-ghost {
   }
 
   .week-day,
-  .dash-hero,
-  .dash-split {
+  .dash-hero {
     grid-template-columns: 1fr;
   }
 

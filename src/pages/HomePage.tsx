@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { api } from "../api/client";
-import { formatDate, shiftIso, todayIso, type Attendance, type Occupancy, type StudentFollow } from "../api/gym";
+import { shiftIso, todayIso, type Occupancy, type StudentFollow } from "../api/gym";
 import { isStudent, type User } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import { useGymBrand, useRefreshGymBrand } from "../auth/GymBrand";
@@ -30,7 +30,6 @@ export function HomePage() {
   const refreshGym = useRefreshGymBrand();
   const [occupancy, setOccupancy] = useState<Occupancy | null>(null);
   const [students, setStudents] = useState<StudentFollow[]>([]);
-  const [inside, setInside] = useState<Attendance[]>([]);
   const [pending, setPending] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -38,10 +37,9 @@ export function HomePage() {
     void refreshGym();
     let cancelled = false;
     async function run() {
-      const [nextOccupancy, nextStudents, nextInside, nextPending] = await Promise.all([
+      const [nextOccupancy, nextStudents, nextPending] = await Promise.all([
         api.getOccupancy().catch(() => null),
         api.listStudentFollow().catch(() => [] as StudentFollow[]),
-        api.listInside().catch(() => [] as Attendance[]),
         api.listPending().catch(() => [] as User[]),
       ]);
       if (cancelled) {
@@ -49,7 +47,6 @@ export function HomePage() {
       }
       setOccupancy(nextOccupancy);
       setStudents(nextStudents);
-      setInside(nextInside);
       setPending(nextPending);
       setLoading(false);
     }
@@ -123,7 +120,7 @@ export function HomePage() {
         <Link className="session-card dash-metric" to="/admin/alumnos">
           <p className="eyebrow">Adentro ahora</p>
           <strong>
-            {occupancy?.currentOccupancy ?? inside.length}
+            {occupancy?.currentOccupancy ?? 0}
             <span> / {occupancy?.maxCapacity ?? "—"}</span>
           </strong>
           <p>{open ? "Hay lugar en el piso." : "El ingreso está cerrado."}</p>
@@ -145,52 +142,6 @@ export function HomePage() {
         </Link>
       </section>
 
-      <section className="dash-split">
-        <article className="session-card dash-panel">
-          <h2>Adentro</h2>
-          {inside.length === 0 ? (
-            <p className="lede">No hay alumnos adentro.</p>
-          ) : (
-            <ul className="dash-list">
-              {inside.map((person) => (
-                <li key={person.id}>
-                  <strong>{person.studentName}</strong>
-                </li>
-              ))}
-            </ul>
-          )}
-        </article>
-        <article className="session-card dash-panel">
-          <div className="page-toolbar">
-            <h2>Para mirar</h2>
-            <Link className="text-btn" to="/admin/alumnos">
-              Ver alumnos
-            </Link>
-          </div>
-          {expiring.length === 0 && withoutRoutine.length === 0 ? (
-            <p className="lede">Nada para revisar.</p>
-          ) : (
-            <ul className="dash-list">
-              {expiring.slice(0, 6).map((student) => (
-                <li key={student.id}>
-                  <strong>
-                    {student.lastName}, {student.firstName}
-                  </strong>
-                  <span>Vence el {formatDate(student.routineExpiration)}</span>
-                </li>
-              ))}
-              {withoutRoutine.slice(0, Math.max(0, 6 - expiring.length)).map((student) => (
-                <li key={student.id}>
-                  <strong>
-                    {student.lastName}, {student.firstName}
-                  </strong>
-                  <span>Sin rutina</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </article>
-      </section>
     </>
   );
 }
