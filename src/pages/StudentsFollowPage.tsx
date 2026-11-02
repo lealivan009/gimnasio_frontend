@@ -11,6 +11,8 @@ function formatDateTime(value: string | null) {
   return new Date(value).toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" });
 }
 
+const PAGE_SIZES = [10, 25, 50] as const;
+
 function attendanceDate(value: string) {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Argentina/Buenos_Aires" }).format(new Date(value));
 }
@@ -23,6 +25,8 @@ export function StudentsFollowPage() {
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [openNow, setOpenNow] = useState(false);
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState<(typeof PAGE_SIZES)[number]>(10);
 
   async function load() {
     const [data, present, occupancy] = await Promise.all([
@@ -95,19 +99,6 @@ export function StudentsFollowPage() {
         </p>
         <Toast message={notice} onClose={() => setNotice(null)} />
       </section>
-      <section className="session-card">
-        <h2>En el gimnasio ahora</h2>
-        <p className="occupancy-figure">{inside.length}</p>
-        {inside.length === 0 ? (
-          <p className="lede">No hay alumnos adentro.</p>
-        ) : (
-          <ul className="plain-list">
-            {inside.map((person) => (
-              <li key={person.id}>{person.studentName}</li>
-            ))}
-          </ul>
-        )}
-      </section>
       <section className="session-card table-card">
         {error ? <p className="alert">{error}</p> : null}
         {loading ? (
@@ -115,6 +106,26 @@ export function StudentsFollowPage() {
         ) : students.length === 0 ? (
           <p className="lede">Todavía no hay alumnos.</p>
         ) : (
+          <>
+          <div className="table-toolbar compact">
+            <label className="field" htmlFor="studentPageSize">
+              <span className="field-label">Por página</span>
+              <select
+                id="studentPageSize"
+                value={pageSize}
+                onChange={(event) => {
+                  setPageSize(Number(event.target.value) as (typeof PAGE_SIZES)[number]);
+                  setPage(0);
+                }}
+              >
+                {PAGE_SIZES.map((size) => (
+                  <option key={size} value={size}>
+                    {size}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
           <div className="table-wrap">
             <table className="users-table">
               <thead>
@@ -128,7 +139,7 @@ export function StudentsFollowPage() {
                 </tr>
               </thead>
               <tbody>
-                {students.map((student) => {
+                {students.slice(page * pageSize, page * pageSize + pageSize).map((student) => {
                   const isInside = inside.some((person) => person.studentId === student.id);
                   const presentToday =
                     student.lastCheckIn != null &&
@@ -197,6 +208,29 @@ export function StudentsFollowPage() {
               </tbody>
             </table>
           </div>
+          <div className="table-pagination">
+            <p className="table-meta">
+              {students.length === 0 ? 0 : page * pageSize + 1}–{Math.min(students.length, (page + 1) * pageSize)} de{" "}
+              {students.length}
+            </p>
+            <div className="pager-actions">
+              <button type="button" className="btn-ghost" disabled={page <= 0} onClick={() => setPage((value) => value - 1)}>
+                Anterior
+              </button>
+              <span className="table-meta">
+                Página {page + 1} de {Math.max(1, Math.ceil(students.length / pageSize))}
+              </span>
+              <button
+                type="button"
+                className="btn-ghost"
+                disabled={page + 1 >= Math.ceil(students.length / pageSize)}
+                onClick={() => setPage((value) => value + 1)}
+              >
+                Siguiente
+              </button>
+            </div>
+          </div>
+          </>
         )}
       </section>
     </>

@@ -1249,6 +1249,10 @@ a.btn-ghost {
   margin: 0 0 18px;
 }
 
+.table-toolbar.compact {
+  grid-template-columns: 160px;
+}
+
 .table-search {
   min-width: 0;
 }
