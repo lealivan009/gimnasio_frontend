@@ -1,6 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { Exercise, MuscleGroup, RoutineExercise, RoutineExerciseInput } from "../api/gym";
 import { dayTitle, MUSCLE_GROUPS, MUSCLE_LABELS, routineDays } from "../api/gym";
+import { ExerciseHowTo } from "./ExerciseHowTo";
 
 function fold(value: string) {
   return value.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
@@ -361,7 +362,10 @@ function DayExercises({ exercises }: { exercises: RoutineExercise[] }) {
           <ul className="plain-list exercise-list">
             {(grouped.get(muscle) ?? []).map((exercise) => (
               <li key={exercise.id}>
-                <strong>{exercise.exerciseName}</strong>
+                <div className="exercise-name">
+                  <strong>{exercise.exerciseName}</strong>
+                  <ExerciseHowTo exerciseId={exercise.exerciseId} name={exercise.exerciseName} notes={exercise.notes} />
+                </div>
                 <span>
                   {exercise.targetSets}×{exercise.targetReps} · {exercise.targetRestSeconds}s
                 </span>

@@ -22,6 +22,7 @@ import {
   type RoutineExercise,
   type WorkoutLog,
 } from "../api/gym";
+import { ExerciseHowTo } from "../components/ExerciseHowTo";
 import { MonthCalendar } from "../components/MonthCalendar";
 import { Toast } from "../components/Toast";
 import { weekdayIndex } from "../gym/hours";
@@ -511,7 +512,10 @@ function TrainingDay({
               return (
                 <article className="tracker-card" key={exercise.id}>
                   <div>
-                    <strong>{exercise.exerciseName}</strong>
+                    <div className="exercise-name">
+                      <strong>{exercise.exerciseName}</strong>
+                      <ExerciseHowTo exerciseId={exercise.exerciseId} name={exercise.exerciseName} notes={exercise.notes} />
+                    </div>
                     <p className="cell-note">
                       {MUSCLE_LABELS[exercise.muscleGroup]} · objetivo {exercise.targetSets}×{exercise.targetReps}
                       {exercise.notes ? ` · ${exercise.notes}` : ""}
