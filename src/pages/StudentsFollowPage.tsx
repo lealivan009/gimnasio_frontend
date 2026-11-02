@@ -22,21 +22,32 @@ export function StudentsFollowPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [openNow, setOpenNow] = useState(false);
 
   async function load() {
-    const [data, present] = await Promise.all([api.listStudentFollow(), api.listInside()]);
+    const [data, present, occupancy] = await Promise.all([
+      api.listStudentFollow(),
+      api.listInside(),
+      api.getOccupancy(),
+    ]);
     setStudents(data);
     setInside(present);
+    setOpenNow(occupancy.openNow);
   }
 
   useEffect(() => {
     let cancelled = false;
     async function run() {
       try {
-        const [data, present] = await Promise.all([api.listStudentFollow(), api.listInside()]);
+        const [data, present, occupancy] = await Promise.all([
+          api.listStudentFollow(),
+          api.listInside(),
+          api.getOccupancy(),
+        ]);
         if (!cancelled) {
           setStudents(data);
           setInside(present);
+          setOpenNow(occupancy.openNow);
         }
       } catch (err) {
         if (!cancelled) {
@@ -155,15 +166,26 @@ export function StudentsFollowPage() {
                     <td className="actions">
                       {presentToday && !isInside ? (
                         <span className="pill on">Presente</span>
-                      ) : (
+                      ) : isInside ? (
                         <button
                           type="button"
-                          className={isInside ? "btn-ghost" : "btn-primary btn-inline"}
+                          className="btn-ghost"
                           disabled={busyId === student.id}
-                          onClick={() => mark(student.id, isInside ? "out" : "in")}
+                          onClick={() => mark(student.id, "out")}
                         >
-                          {isInside ? "Marcar salida" : "Dar presente"}
+                          Marcar salida
                         </button>
+                      ) : openNow ? (
+                        <button
+                          type="button"
+                          className="btn-primary btn-inline"
+                          disabled={busyId === student.id}
+                          onClick={() => mark(student.id, "in")}
+                        >
+                          Dar presente
+                        </button>
+                      ) : (
+                        <span className="pill off">Cerrado</span>
                       )}
                       <Link className="text-btn" to={`/admin/progreso?alumno=${student.id}`}>
                         Ver progreso
