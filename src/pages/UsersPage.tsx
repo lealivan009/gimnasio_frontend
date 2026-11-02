@@ -226,23 +226,6 @@ export function UsersPage() {
               <option value="ADMIN">Administrador</option>
             </select>
           </label>
-          <label className="field" htmlFor="pageSize">
-            <span className="field-label">Por página</span>
-            <select
-              id="pageSize"
-              value={pageSize}
-              onChange={(event) => {
-                setPageSize(Number(event.target.value) as (typeof PAGE_SIZES)[number]);
-                setPage(0);
-              }}
-            >
-              {PAGE_SIZES.map((size) => (
-                <option key={size} value={size}>
-                  {size}
-                </option>
-              ))}
-            </select>
-          </label>
         </div>
 
         {error ? <p className="alert">{error}</p> : null}
@@ -304,6 +287,23 @@ export function UsersPage() {
               <p className="table-meta">
                 {from}–{to} de {total}
               </p>
+              <label className="page-size">
+                <span>Por página</span>
+                <select
+                  aria-label="Por página"
+                  value={pageSize}
+                  onChange={(event) => {
+                    setPageSize(Number(event.target.value) as (typeof PAGE_SIZES)[number]);
+                    setPage(0);
+                  }}
+                >
+                  {PAGE_SIZES.map((size) => (
+                    <option key={size} value={size}>
+                      {size}
+                    </option>
+                  ))}
+                </select>
+              </label>
               <div className="pager-actions">
                 <button
                   type="button"

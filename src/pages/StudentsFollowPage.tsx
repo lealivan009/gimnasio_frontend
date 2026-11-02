@@ -89,14 +89,34 @@ export function StudentsFollowPage() {
     }
   }
 
+  const todayKey = attendanceDate(new Date().toISOString());
+  const presentTodayCount = students.filter(
+    (student) => student.lastCheckIn != null && attendanceDate(student.lastCheckIn) === todayKey
+  ).length;
+  const withoutRoutine = students.filter((student) => !student.activeRoutineTitle).length;
+
   return (
     <>
       <section className="session-card">
-        <p className="eyebrow">Seguimiento</p>
         <h1>Alumnos</h1>
-        <p className="lede">
-          El alumno puede marcar su presente. Si se olvida, marcalo vos cuando entra y la salida cuando se va. Un día de esta semana se carga desde su progreso.
-        </p>
+        <div className="student-facts">
+          <div>
+            <p className="eyebrow">Total</p>
+            <strong>{students.length}</strong>
+          </div>
+          <div>
+            <p className="eyebrow">Adentro</p>
+            <strong>{inside.length}</strong>
+          </div>
+          <div>
+            <p className="eyebrow">Presentes hoy</p>
+            <strong>{presentTodayCount}</strong>
+          </div>
+          <div>
+            <p className="eyebrow">Sin rutina</p>
+            <strong>{withoutRoutine}</strong>
+          </div>
+        </div>
         <Toast message={notice} onClose={() => setNotice(null)} />
       </section>
       <section className="session-card table-card">
@@ -107,25 +127,6 @@ export function StudentsFollowPage() {
           <p className="lede">Todavía no hay alumnos.</p>
         ) : (
           <>
-          <div className="table-toolbar compact">
-            <label className="field" htmlFor="studentPageSize">
-              <span className="field-label">Por página</span>
-              <select
-                id="studentPageSize"
-                value={pageSize}
-                onChange={(event) => {
-                  setPageSize(Number(event.target.value) as (typeof PAGE_SIZES)[number]);
-                  setPage(0);
-                }}
-              >
-                {PAGE_SIZES.map((size) => (
-                  <option key={size} value={size}>
-                    {size}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
           <div className="table-wrap">
             <table className="users-table">
               <thead>
@@ -213,6 +214,23 @@ export function StudentsFollowPage() {
               {students.length === 0 ? 0 : page * pageSize + 1}–{Math.min(students.length, (page + 1) * pageSize)} de{" "}
               {students.length}
             </p>
+            <label className="page-size">
+              <span>Por página</span>
+              <select
+                aria-label="Por página"
+                value={pageSize}
+                onChange={(event) => {
+                  setPageSize(Number(event.target.value) as (typeof PAGE_SIZES)[number]);
+                  setPage(0);
+                }}
+              >
+                {PAGE_SIZES.map((size) => (
+                  <option key={size} value={size}>
+                    {size}
+                  </option>
+                ))}
+              </select>
+            </label>
             <div className="pager-actions">
               <button type="button" className="btn-ghost" disabled={page <= 0} onClick={() => setPage((value) => value - 1)}>
                 Anterior
