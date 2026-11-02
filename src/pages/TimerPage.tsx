@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { beep } from "../gym/sound";
 
 type Mode = "stopwatch" | "countdown";
 
@@ -23,27 +24,6 @@ function formatCountdown(ms: number) {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-}
-
-function beep() {
-  const audioWindow = window as Window & { webkitAudioContext?: typeof AudioContext };
-  const Context = window.AudioContext ?? audioWindow.webkitAudioContext;
-  if (!Context) {
-    return;
-  }
-  const context = new Context();
-  const oscillator = context.createOscillator();
-  const gain = context.createGain();
-  oscillator.frequency.value = 880;
-  oscillator.connect(gain);
-  gain.connect(context.destination);
-  gain.gain.setValueAtTime(0.15, context.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + 0.45);
-  oscillator.start();
-  oscillator.stop(context.currentTime + 0.45);
-  oscillator.onended = () => {
-    void context.close();
-  };
 }
 
 export function TimerPage() {

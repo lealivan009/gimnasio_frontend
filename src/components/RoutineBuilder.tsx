@@ -235,6 +235,25 @@ export function RoutineBuilder({
     );
   }
 
+  function moveRow(dayKey: string, rowKey: string, direction: -1 | 1) {
+    onChange(
+      days.map((day) => {
+        if (day.key !== dayKey) {
+          return day;
+        }
+        const index = day.rows.findIndex((row) => row.key === rowKey);
+        const next = index + direction;
+        if (index < 0 || next < 0 || next >= day.rows.length) {
+          return day;
+        }
+        const rows = [...day.rows];
+        const [item] = rows.splice(index, 1);
+        rows.splice(next, 0, item);
+        return { ...day, rows };
+      })
+    );
+  }
+
   return (
     <div className="day-stack">
       <p className="hint left">
@@ -267,14 +286,32 @@ export function RoutineBuilder({
             <div className="routine-row" key={row.key}>
               <div className="routine-row-head">
                 <strong>Ejercicio {rowIndex + 1}</strong>
-                <button
-                  type="button"
-                  className="text-btn"
-                  onClick={() => updateDay(day.key, { rows: day.rows.filter((item) => item.key !== row.key) })}
-                  disabled={day.rows.length === 1}
-                >
-                  Quitar
-                </button>
+                <div className="row-actions">
+                  <button
+                    type="button"
+                    className="text-btn"
+                    onClick={() => moveRow(day.key, row.key, -1)}
+                    disabled={rowIndex === 0}
+                  >
+                    Subir
+                  </button>
+                  <button
+                    type="button"
+                    className="text-btn"
+                    onClick={() => moveRow(day.key, row.key, 1)}
+                    disabled={rowIndex === day.rows.length - 1}
+                  >
+                    Bajar
+                  </button>
+                  <button
+                    type="button"
+                    className="text-btn"
+                    onClick={() => updateDay(day.key, { rows: day.rows.filter((item) => item.key !== row.key) })}
+                    disabled={day.rows.length === 1}
+                  >
+                    Quitar
+                  </button>
+                </div>
               </div>
               <label className="field">
                 <span className="field-label">Ejercicio del catálogo</span>

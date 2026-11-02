@@ -1917,6 +1917,18 @@ textarea {
   align-items: flex-start;
 }
 
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.row-actions .text-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
 .routine-card-head {
   align-items: center;
   gap: 8px;

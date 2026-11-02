@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { api } from "../api/client";
 import {
   DAY_LABELS,
@@ -26,6 +26,7 @@ import { ExerciseHowTo } from "../components/ExerciseHowTo";
 import { MonthCalendar } from "../components/MonthCalendar";
 import { Toast } from "../components/Toast";
 import { weekdayIndex } from "../gym/hours";
+import { beep, unlockSound } from "../gym/sound";
 
 function monthStart(year: number, month: number) {
   return `${year}-${String(month).padStart(2, "0")}-01`;
@@ -64,6 +65,7 @@ export function StudentHomePage() {
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [rest, setRest] = useState<{ name: string; left: number } | null>(null);
+  const restFinished = useRef(false);
   const [drafts, setDrafts] = useState<Record<string, { reps: string; weight: string; rpe: string }>>({});
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
@@ -127,9 +129,18 @@ export function StudentHomePage() {
   }, [today, year, month, logDate]);
 
   useEffect(() => {
-    if (!rest || rest.left <= 0) {
+    if (!rest) {
+      restFinished.current = false;
       return;
     }
+    if (rest.left <= 0) {
+      if (!restFinished.current) {
+        restFinished.current = true;
+        beep();
+      }
+      return;
+    }
+    restFinished.current = false;
     const handle = window.setTimeout(() => setRest({ ...rest, left: rest.left - 1 }), 1000);
     return () => window.clearTimeout(handle);
   }, [rest]);
@@ -150,6 +161,7 @@ export function StudentHomePage() {
 
   async function onLog(event: FormEvent, exerciseId: string, restSeconds: number, exerciseName: string) {
     event.preventDefault();
+    unlockSound();
     if (logDate > today) {
       setError("No podés cargar un día que todavía no llegó.");
       return;
