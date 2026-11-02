@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { api } from "../api/client";
-import { displayName, isStaff, isStudent, roleLabel, type User } from "../api/types";
-import type { Occupancy } from "../api/gym";
+import { formatDate, shiftIso, todayIso, type Attendance, type Occupancy, type StudentFollow } from "../api/gym";
+import { isStudent, type User } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import { useGymBrand, useRefreshGymBrand } from "../auth/GymBrand";
 import { HoursBoard } from "../components/HoursBoard";
@@ -29,10 +29,34 @@ export function HomePage() {
   const gym = useGymBrand();
   const refreshGym = useRefreshGymBrand();
   const [occupancy, setOccupancy] = useState<Occupancy | null>(null);
+  const [students, setStudents] = useState<StudentFollow[]>([]);
+  const [inside, setInside] = useState<Attendance[]>([]);
+  const [pending, setPending] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     void refreshGym();
-    api.getOccupancy().then(setOccupancy).catch(() => setOccupancy(null));
+    let cancelled = false;
+    async function run() {
+      const [nextOccupancy, nextStudents, nextInside, nextPending] = await Promise.all([
+        api.getOccupancy().catch(() => null),
+        api.listStudentFollow().catch(() => [] as StudentFollow[]),
+        api.listInside().catch(() => [] as Attendance[]),
+        api.listPending().catch(() => [] as User[]),
+      ]);
+      if (cancelled) {
+        return;
+      }
+      setOccupancy(nextOccupancy);
+      setStudents(nextStudents);
+      setInside(nextInside);
+      setPending(nextPending);
+      setLoading(false);
+    }
+    void run();
+    return () => {
+      cancelled = true;
+    };
   }, [refreshGym]);
 
   if (!user) {
@@ -50,6 +74,12 @@ export function HomePage() {
   const greeting = hour < 12 ? "Buenos días" : hour < 19 ? "Buenas tardes" : "Buenas noches";
   const hours = gym?.hours ?? [];
   const open = hours.length > 0 ? isOpenNow(hours) : occupancy?.openNow;
+  const today = todayIso();
+  const soon = shiftIso(today, 14);
+  const expiring = students
+    .filter((student) => student.routineExpiration != null && student.routineExpiration >= today && student.routineExpiration <= soon)
+    .sort((a, b) => (a.routineExpiration ?? "").localeCompare(b.routineExpiration ?? ""));
+  const withoutRoutine = students.filter((student) => !student.activeRoutineTitle);
 
   return (
     <>
@@ -74,26 +104,6 @@ export function HomePage() {
         </div>
       </section>
 
-      {occupancy ? (
-        <section className="stat-grid">
-          <article className="session-card stat-card">
-            <p className="eyebrow">Adentro ahora</p>
-            <strong>
-              {occupancy.currentOccupancy}
-              <span> / {occupancy.maxCapacity}</span>
-            </strong>
-            <p>{open ? "Hay lugar en el piso." : "El ingreso está cerrado en este horario."}</p>
-          </article>
-          {admin ? null : (
-            <article className="session-card stat-card">
-              <p className="eyebrow">Tu rol</p>
-              <strong className="dash-role">{roleLabel(user.role)}</strong>
-              <p>{displayName(user)}</p>
-            </article>
-          )}
-        </section>
-      ) : null}
-
       {incomplete ? (
         <section className="session-card callout-card">
           <div>
@@ -109,45 +119,77 @@ export function HomePage() {
         </section>
       ) : null}
 
-      <section className="home-grid">
-        <Link className="home-tile" to="/app/profile">
-          <span className="home-tile-index">01</span>
-          <strong>Mi perfil</strong>
-          <p>Nombre, documento, celular y domicilio.</p>
+      <section className="dash-metrics">
+        <Link className="session-card dash-metric" to="/admin/alumnos">
+          <p className="eyebrow">Adentro ahora</p>
+          <strong>
+            {occupancy?.currentOccupancy ?? inside.length}
+            <span> / {occupancy?.maxCapacity ?? "—"}</span>
+          </strong>
+          <p>{open ? "Hay lugar en el piso." : "El ingreso está cerrado."}</p>
         </Link>
-        <Link className="home-tile" to="/app/account">
-          <span className="home-tile-index">02</span>
-          <strong>Cuenta y seguridad</strong>
-          <p>Contraseña y estado de la cuenta.</p>
+        <Link className="session-card dash-metric" to="/admin/alumnos">
+          <p className="eyebrow">Alumnos</p>
+          <strong>{loading ? "—" : students.length}</strong>
+          <p>{withoutRoutine.length === 1 ? "1 sin rutina" : `${withoutRoutine.length} sin rutina`}</p>
         </Link>
-        {isStaff(user.role) ? (
-          <Link className="home-tile" to="/admin/alumnos">
-            <span className="home-tile-index">03</span>
-            <strong>Alumnos</strong>
-            <p>Rutina activa, vencimiento y asistencia.</p>
-          </Link>
-        ) : null}
-        {isStaff(user.role) ? (
-          <Link className="home-tile" to="/admin/ejercicios">
-            <span className="home-tile-index">04</span>
-            <strong>Ejercicios</strong>
-            <p>Catálogo con grupo muscular y video.</p>
-          </Link>
-        ) : null}
-        {isStaff(user.role) ? (
-          <Link className="home-tile" to="/admin/rutinas">
-            <span className="home-tile-index">05</span>
-            <strong>Rutinas</strong>
-            <p>Armalas, duplicálas y asignálas.</p>
-          </Link>
-        ) : null}
-        {isStaff(user.role) ? (
-          <Link className="home-tile" to="/admin/horarios">
-            <span className="home-tile-index">06</span>
-            <strong>Plataforma</strong>
-            <p>Nombre, portada, horarios y turnos.</p>
-          </Link>
-        ) : null}
+        <Link className="session-card dash-metric" to="/admin/pendientes">
+          <p className="eyebrow">Pendientes</p>
+          <strong>{loading ? "—" : pending.length}</strong>
+          <p>{pending.length === 0 ? "Nadie esperando aprobación." : "Cuentas para revisar."}</p>
+        </Link>
+        <Link className="session-card dash-metric" to="/admin/alumnos">
+          <p className="eyebrow">Por vencer</p>
+          <strong>{loading ? "—" : expiring.length}</strong>
+          <p>Rutinas que vencen en 14 días.</p>
+        </Link>
+      </section>
+
+      <section className="dash-split">
+        <article className="session-card dash-panel">
+          <h2>Adentro</h2>
+          {inside.length === 0 ? (
+            <p className="lede">No hay alumnos adentro.</p>
+          ) : (
+            <ul className="dash-list">
+              {inside.map((person) => (
+                <li key={person.id}>
+                  <strong>{person.studentName}</strong>
+                </li>
+              ))}
+            </ul>
+          )}
+        </article>
+        <article className="session-card dash-panel">
+          <div className="page-toolbar">
+            <h2>Para mirar</h2>
+            <Link className="text-btn" to="/admin/alumnos">
+              Ver alumnos
+            </Link>
+          </div>
+          {expiring.length === 0 && withoutRoutine.length === 0 ? (
+            <p className="lede">Nada para revisar.</p>
+          ) : (
+            <ul className="dash-list">
+              {expiring.slice(0, 6).map((student) => (
+                <li key={student.id}>
+                  <strong>
+                    {student.lastName}, {student.firstName}
+                  </strong>
+                  <span>Vence el {formatDate(student.routineExpiration)}</span>
+                </li>
+              ))}
+              {withoutRoutine.slice(0, Math.max(0, 6 - expiring.length)).map((student) => (
+                <li key={student.id}>
+                  <strong>
+                    {student.lastName}, {student.firstName}
+                  </strong>
+                  <span>Sin rutina</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </article>
       </section>
     </>
   );
