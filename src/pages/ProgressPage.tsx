@@ -5,7 +5,6 @@ import {
   formatDate,
   todayIso,
   type CalendarDay,
-  type Exercise,
   type ProgressPoint,
   type StatsSummary,
   type StudentFollow,
@@ -24,10 +23,9 @@ export function ProgressPage() {
   const requestedStudent = params.get("alumno") ?? "";
   const [students, setStudents] = useState<StudentFollow[]>([]);
   const [studentId, setStudentId] = useState(requestedStudent);
-  const [exercises, setExercises] = useState<Exercise[]>([]);
   const [exerciseId, setExerciseId] = useState("");
   const [summary, setSummary] = useState<StatsSummary | null>(null);
-  const [points, setPoints] = useState<ProgressPoint[]>([]);
+  const [series, setSeries] = useState<{ exerciseId: string; points: ProgressPoint[] } | null>(null);
   const [days, setDays] = useState<CalendarDay[]>([]);
   const [weights, setWeights] = useState<WeightLog[]>([]);
   const [weightKg, setWeightKg] = useState("");
@@ -45,12 +43,6 @@ export function ProgressPage() {
     let cancelled = false;
     async function run() {
       try {
-        const catalog = await api.listExercises();
-        if (cancelled) {
-          return;
-        }
-        setExercises(catalog);
-        setExerciseId((current) => current || catalog[0]?.id || "");
         if (staff) {
           const list = await api.listStudentFollow();
           if (cancelled) {
@@ -86,10 +78,9 @@ export function ProgressPage() {
       setError(null);
       try {
         const owner = staff ? studentId : undefined;
-        const [nextSummary, nextDays, nextPoints, nextWeights] = await Promise.all([
+        const [nextSummary, nextDays, nextWeights] = await Promise.all([
           api.statsSummary(owner),
           api.calendar(year, month, owner),
-          exerciseId ? api.exerciseProgress(exerciseId, owner) : Promise.resolve([]),
           api.listWeights(owner),
         ]);
         if (cancelled) {
@@ -97,7 +88,6 @@ export function ProgressPage() {
         }
         setSummary(nextSummary);
         setDays(nextDays);
-        setPoints(nextPoints);
         setWeights(nextWeights);
       } catch (err) {
         if (!cancelled) {
@@ -113,7 +103,31 @@ export function ProgressPage() {
     return () => {
       cancelled = true;
     };
-  }, [staff, studentId, exerciseId, year, month]);
+  }, [staff, studentId, year, month]);
+
+  useEffect(() => {
+    if (!exerciseId || (staff && !studentId)) {
+      setSeries(null);
+      return;
+    }
+    let cancelled = false;
+    const owner = staff ? studentId : undefined;
+    api
+      .exerciseProgress(exerciseId, owner)
+      .then((nextPoints) => {
+        if (!cancelled) {
+          setSeries({ exerciseId, points: nextPoints });
+        }
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "No se pudo cargar la evolución");
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [exerciseId, staff, studentId]);
 
   function shiftMonth(delta: number) {
     const next = new Date(year, month - 1 + delta, 1);
@@ -134,6 +148,7 @@ export function ProgressPage() {
               value={studentId}
               onChange={(event) => {
                 setStudentId(event.target.value);
+                setExerciseId("");
                 setParams({ alumno: event.target.value });
               }}
             >
@@ -153,47 +168,49 @@ export function ProgressPage() {
         <h2>Marcas personales</h2>
         {summary && summary.records.length > 0 ? (
           <ul className="record-list">
-            {summary.records.map((record) => (
-              <li key={record.exerciseId}>
-                <div className="record-copy">
-                  <strong>{record.exerciseName}</strong>
-                  <span>{formatDate(record.achievedAt.slice(0, 10))}</span>
-                </div>
-                <p className="record-kg">
-                  {new Intl.NumberFormat("es-AR", { maximumFractionDigits: 2 }).format(Number(record.maxWeightKg))}
-                  <small>kg</small>
-                </p>
-              </li>
-            ))}
+            {summary.records.map((record) => {
+              const open = exerciseId === record.exerciseId;
+              return (
+                <li key={record.exerciseId} className={open ? "is-open" : undefined}>
+                  <button
+                    type="button"
+                    className="record-row"
+                    aria-expanded={open}
+                    onClick={() => setExerciseId(open ? "" : record.exerciseId)}
+                  >
+                    <div className="record-copy">
+                      <strong>{record.exerciseName}</strong>
+                      <span>{formatDate(record.achievedAt.slice(0, 10))}</span>
+                    </div>
+                    <span className="record-kg">
+                      {new Intl.NumberFormat("es-AR", { maximumFractionDigits: 2 }).format(Number(record.maxWeightKg))}
+                      <small>kg</small>
+                    </span>
+                  </button>
+                  {open ? (
+                    <div className="record-chart">
+                      <h3>Peso máximo</h3>
+                      {series?.exerciseId === record.exerciseId ? (
+                        <LineChart
+                          label={`Peso máximo de ${record.exerciseName}`}
+                          unit="kg"
+                          points={series.points.map((point) => ({
+                            label: formatDate(point.date),
+                            value: Number(point.maxWeightKg),
+                          }))}
+                        />
+                      ) : (
+                        <p className="lede">Cargando…</p>
+                      )}
+                    </div>
+                  ) : null}
+                </li>
+              );
+            })}
           </ul>
         ) : (
           <p className="lede">Todavía no hay récords de peso.</p>
         )}
-      </section>
-
-      <section className="session-card">
-        <h2>Evolución por ejercicio</h2>
-        <label className="field">
-          <span className="field-label">Ejercicio</span>
-          <select value={exerciseId} onChange={(event) => setExerciseId(event.target.value)}>
-            {exercises.length === 0 ? <option value="">Sin ejercicios</option> : null}
-            {exercises.map((exercise) => (
-              <option key={exercise.id} value={exercise.id}>
-                {exercise.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <div className="gym-charts">
-          <div>
-            <h3>Peso máximo</h3>
-            <LineChart
-              label="Peso máximo por día"
-              unit="kg"
-              points={points.map((point) => ({ label: formatDate(point.date), value: Number(point.maxWeightKg) }))}
-            />
-          </div>
-        </div>
       </section>
 
       <section className="session-card">

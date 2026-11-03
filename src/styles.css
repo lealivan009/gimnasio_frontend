@@ -2061,18 +2061,44 @@ textarea {
 }
 
 .record-list li {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
   margin: 0;
-  padding: 12px 0;
+  padding: 0;
   border-bottom: 1px solid var(--line);
 }
 
 .record-list li:last-child {
   border-bottom: 0;
-  padding-bottom: 0;
+}
+
+.record-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  margin: 0;
+  padding: 12px 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.record-list li.is-open .record-row strong,
+.record-row:hover strong {
+  color: var(--accent);
+}
+
+.record-chart {
+  padding: 0 0 14px;
+}
+
+.record-chart h3 {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 
 .record-copy {
@@ -2093,6 +2119,7 @@ textarea {
 }
 
 .record-kg {
+  display: block;
   flex: 0 0 auto;
   margin: 0;
   font-family: var(--serif);
