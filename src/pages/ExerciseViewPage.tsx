@@ -67,7 +67,9 @@ export function ExerciseViewPage() {
       {loading ? <p className="lede">Cargando…</p> : null}
       {exercise ? (
         <>
-          <p className="cell-note">{MUSCLE_LABELS[exercise.muscleGroup]}</p>
+          <p className="cell-note">
+            {MUSCLE_LABELS[exercise.muscleGroup]} · {exercise.measure === "TIEMPO" ? "Tiempo" : "Peso"}
+          </p>
           {exercise.description ? <p className="lede">{exercise.description}</p> : <p className="lede">Sin descripción.</p>}
           {exercise.videoUrl ? (
             <p>

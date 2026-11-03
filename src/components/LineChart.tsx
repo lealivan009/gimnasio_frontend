@@ -1,3 +1,5 @@
+import { formatDuration } from "../api/gym";
+
 export function LineChart({
   points,
   label,
@@ -43,7 +45,7 @@ export function LineChart({
     <div className="chart-plot" role="img" aria-label={`${label}. ${summary}`}>
       <div className="chart-scale" aria-hidden="true">
         {ticks.map((tick, index) => (
-          <span key={index}>{formatChartValue(tick, index === 0 ? unit : "")}</span>
+          <span key={index}>{formatChartValue(tick, unit === "s" || index === 0 ? unit : "")}</span>
         ))}
       </div>
       <div className="chart-canvas">
@@ -111,6 +113,9 @@ export function LineChart({
 }
 
 function formatChartValue(value: number, unit: string) {
+  if (unit === "s") {
+    return formatDuration(value);
+  }
   const text = new Intl.NumberFormat("es-AR", {
     maximumFractionDigits: Math.abs(value) >= 100 ? 0 : 1,
   }).format(value);

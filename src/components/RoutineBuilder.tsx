@@ -1,7 +1,11 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { Exercise, MuscleGroup, RoutineExercise, RoutineExerciseInput } from "../api/gym";
-import { dayTitle, MUSCLE_GROUPS, MUSCLE_LABELS, routineDays } from "../api/gym";
+import { dayTitle, exerciseTarget, MUSCLE_GROUPS, MUSCLE_LABELS, routineDays } from "../api/gym";
 import { ExerciseHowTo } from "./ExerciseHowTo";
+
+function isTimed(catalog: Exercise[], exerciseId: string) {
+  return catalog.find((item) => item.id === exerciseId)?.measure === "TIEMPO";
+}
 
 function fold(value: string) {
   return value.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
@@ -33,7 +37,9 @@ function ExercisePicker({
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const selected = catalog.find((exercise) => exercise.id === value) ?? null;
-  const selectedLabel = selected ? `${selected.name} · ${MUSCLE_LABELS[selected.muscleGroup]}` : "";
+  const selectedLabel = selected
+    ? `${selected.name} · ${MUSCLE_LABELS[selected.muscleGroup]}${selected.measure === "TIEMPO" ? " · tiempo" : ""}`
+    : "";
   const needle = fold(query.trim());
   const visible = useMemo(
     () =>
@@ -134,6 +140,7 @@ function ExercisePicker({
                     onClick={() => choose(exercise.id)}
                   >
                     {exercise.name}
+                    {exercise.measure === "TIEMPO" ? " · tiempo" : ""}
                   </button>
                 </li>
               );
@@ -321,7 +328,7 @@ export function RoutineBuilder({
                   onChange={(exerciseId) => updateRow(day.key, row.key, { exerciseId })}
                 />
               </label>
-              <div className="form-grid triple">
+              <div className={isTimed(catalogSorted, row.exerciseId) ? "form-grid quad" : "form-grid triple"}>
                 <label className="field">
                   <span className="field-label">Series</span>
                   <input
@@ -333,17 +340,52 @@ export function RoutineBuilder({
                     required
                   />
                 </label>
-                <label className="field">
-                  <span className="field-label">Repeticiones</span>
-                  <input
-                    type="number"
-                    min={1}
-                    max={999}
-                    value={row.targetReps}
-                    onChange={(event) => updateRow(day.key, row.key, { targetReps: event.target.value })}
-                    required
-                  />
-                </label>
+                {isTimed(catalogSorted, row.exerciseId) ? (
+                  <>
+                    <label className="field">
+                      <span className="field-label">Minutos</span>
+                      <input
+                        type="number"
+                        min={0}
+                        max={120}
+                        value={Math.floor((Number(row.targetReps) || 0) / 60)}
+                        onChange={(event) => {
+                          const minutes = Math.min(120, Math.max(0, Number(event.target.value) || 0));
+                          const seconds = (Number(row.targetReps) || 0) % 60;
+                          updateRow(day.key, row.key, { targetReps: String(minutes * 60 + seconds) });
+                        }}
+                        required
+                      />
+                    </label>
+                    <label className="field">
+                      <span className="field-label">Segundos</span>
+                      <input
+                        type="number"
+                        min={0}
+                        max={59}
+                        value={(Number(row.targetReps) || 0) % 60}
+                        onChange={(event) => {
+                          const seconds = Math.min(59, Math.max(0, Number(event.target.value) || 0));
+                          const minutes = Math.floor((Number(row.targetReps) || 0) / 60);
+                          updateRow(day.key, row.key, { targetReps: String(minutes * 60 + seconds) });
+                        }}
+                        required
+                      />
+                    </label>
+                  </>
+                ) : (
+                  <label className="field">
+                    <span className="field-label">Repeticiones</span>
+                    <input
+                      type="number"
+                      min={1}
+                      max={999}
+                      value={row.targetReps}
+                      onChange={(event) => updateRow(day.key, row.key, { targetReps: event.target.value })}
+                      required
+                    />
+                  </label>
+                )}
                 <label className="field">
                   <span className="field-label">Descanso (seg)</span>
                   <input
@@ -404,7 +446,7 @@ function DayExercises({ exercises }: { exercises: RoutineExercise[] }) {
                   <ExerciseHowTo exerciseId={exercise.exerciseId} name={exercise.exerciseName} notes={exercise.notes} />
                 </div>
                 <span>
-                  {exercise.targetSets}×{exercise.targetReps} · {exercise.targetRestSeconds}s
+                  {exerciseTarget(exercise.targetSets, exercise.targetReps, exercise.targetRestSeconds, exercise.measure)}
                 </span>
               </li>
             ))}

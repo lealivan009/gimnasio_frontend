@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { api } from "../api/client";
 import {
   formatDate,
+  formatDuration,
   todayIso,
   type CalendarDay,
   type ProgressPoint,
@@ -183,20 +184,31 @@ export function ProgressPage() {
                       <span>{formatDate(record.achievedAt.slice(0, 10))}</span>
                     </div>
                     <span className="record-kg">
-                      {new Intl.NumberFormat("es-AR", { maximumFractionDigits: 2 }).format(Number(record.maxWeightKg))}
-                      <small>kg</small>
+                      {record.measure === "TIEMPO" ? (
+                        formatDuration(record.maxSeconds ?? 0)
+                      ) : (
+                        <>
+                          {new Intl.NumberFormat("es-AR", { maximumFractionDigits: 2 }).format(Number(record.maxWeightKg))}
+                          <small>kg</small>
+                        </>
+                      )}
                     </span>
                   </button>
                   {open ? (
                     <div className="record-chart">
-                      <h3>Peso máximo</h3>
+                      <h3>{record.measure === "TIEMPO" ? "Duración máxima" : "Peso máximo"}</h3>
                       {series?.exerciseId === record.exerciseId ? (
                         <LineChart
-                          label={`Peso máximo de ${record.exerciseName}`}
-                          unit="kg"
+                          label={
+                            record.measure === "TIEMPO"
+                              ? `Duración máxima de ${record.exerciseName}`
+                              : `Peso máximo de ${record.exerciseName}`
+                          }
+                          unit={record.measure === "TIEMPO" ? "s" : "kg"}
                           points={series.points.map((point) => ({
                             label: formatDate(point.date),
-                            value: Number(point.maxWeightKg),
+                            value:
+                              record.measure === "TIEMPO" ? Number(point.maxSeconds ?? 0) : Number(point.maxWeightKg),
                           }))}
                         />
                       ) : (

@@ -125,6 +125,7 @@ export function ExercisesPage() {
                 <tr key={exercise.id}>
                   <td>
                     <strong>{exercise.name}</strong>
+                    {exercise.measure === "TIEMPO" ? <p className="cell-note">Tiempo</p> : null}
                   </td>
                   <td>{MUSCLE_LABELS[exercise.muscleGroup]}</td>
                   <td className="actions">

@@ -7,6 +7,7 @@ import {
   STATUS_LABELS,
   dayTitle,
   formatDate,
+  formatDuration,
   formatKg,
   routineDays,
   sessionName,
@@ -159,7 +160,7 @@ export function StudentHomePage() {
     }
   }
 
-  async function onLog(event: FormEvent, exerciseId: string, restSeconds: number, exerciseName: string) {
+  async function onLog(event: FormEvent, exerciseId: string, restSeconds: number, exerciseName: string, timed: boolean) {
     event.preventDefault();
     unlockSound();
     if (logDate > today) {
@@ -175,6 +176,10 @@ export function StudentHomePage() {
       return;
     }
     const draft = drafts[exerciseId] ?? { reps: "", weight: "", rpe: "" };
+    if (timed && (Number(draft.reps) || 0) < 1) {
+      setError("Indicá cuánto tiempo hiciste.");
+      return;
+    }
     const done = logs.filter((log) => log.exerciseId === exerciseId && (log.dayNumber ?? 1) === loggingDay).length;
     const day = routineDays(active?.routine?.exercises ?? []).find((item) => item.dayNumber === loggingDay);
     await runAction(exerciseId, async () => {
@@ -183,7 +188,7 @@ export function StudentHomePage() {
         routineId: active?.routine?.id,
         setNumber: done + 1,
         repsCompleted: Number(draft.reps),
-        weightKg: Number(draft.weight),
+        weightKg: timed ? 0 : Number(draft.weight),
         rpe: draft.rpe ? Number(draft.rpe) : null,
         dayNumber: loggingDay,
         dayLabel: day?.label ?? null,
@@ -464,7 +469,7 @@ function TrainingDay({
   onChoose: (dayNumber: number) => void;
   onStart: () => void;
   onClose: () => void;
-  onLog: (event: FormEvent, exerciseId: string, restSeconds: number, exerciseName: string) => Promise<void>;
+  onLog: (event: FormEvent, exerciseId: string, restSeconds: number, exerciseName: string, timed: boolean) => Promise<void>;
   logDate: string;
   present: boolean;
 }) {
@@ -516,11 +521,13 @@ function TrainingDay({
           </p>
           <div className="stack">
             {openDay.exercises.map((exercise) => {
+              const timed = exercise.measure === "TIEMPO";
               const done = logs
                 .filter((log) => log.exerciseId === exercise.exerciseId && (log.dayNumber ?? 1) === openDay.dayNumber)
                 .slice()
                 .sort((a, b) => a.setNumber - b.setNumber);
               const draft = drafts[exercise.exerciseId] ?? { reps: String(exercise.targetReps), weight: "", rpe: "" };
+              const totalSeconds = Number(draft.reps) || 0;
               return (
                 <article className="tracker-card" key={exercise.id}>
                   <div>
@@ -529,7 +536,8 @@ function TrainingDay({
                       <ExerciseHowTo exerciseId={exercise.exerciseId} name={exercise.exerciseName} notes={exercise.notes} />
                     </div>
                     <p className="cell-note">
-                      {MUSCLE_LABELS[exercise.muscleGroup]} · objetivo {exercise.targetSets}×{exercise.targetReps}
+                      {MUSCLE_LABELS[exercise.muscleGroup]} · objetivo {exercise.targetSets}×
+                      {exercise.measure === "TIEMPO" ? formatDuration(exercise.targetReps) : exercise.targetReps}
                       {exercise.notes ? ` · ${exercise.notes}` : ""}
                     </p>
                   </div>
@@ -539,7 +547,7 @@ function TrainingDay({
                         <li key={log.id}>
                           <strong>{log.setNumber}</strong>
                           <span>
-                            {log.repsCompleted}×{formatKg(log.weightKg)}
+                            {timed ? formatDuration(log.repsCompleted) : `${log.repsCompleted}×${formatKg(log.weightKg)}`}
                             {log.rpe ? ` · ${log.rpe}` : ""}
                           </span>
                         </li>
@@ -549,35 +557,78 @@ function TrainingDay({
                   {present ? (
                   <form
                     className="set-form"
-                    onSubmit={(event) => onLog(event, exercise.exerciseId, exercise.targetRestSeconds, exercise.exerciseName)}
+                    onSubmit={(event) => onLog(event, exercise.exerciseId, exercise.targetRestSeconds, exercise.exerciseName, timed)}
                   >
-                    <label>
-                      <span>Reps</span>
-                      <input
-                        inputMode="numeric"
-                        type="number"
-                        min={0}
-                        value={draft.reps}
-                        onChange={(event) =>
-                          onDrafts({ ...drafts, [exercise.exerciseId]: { ...draft, reps: event.target.value } })
-                        }
-                        required
-                      />
-                    </label>
-                    <label>
-                      <span>Kg</span>
-                      <input
-                        inputMode="decimal"
-                        type="number"
-                        min={0}
-                        step="0.5"
-                        value={draft.weight}
-                        onChange={(event) =>
-                          onDrafts({ ...drafts, [exercise.exerciseId]: { ...draft, weight: event.target.value } })
-                        }
-                        required
-                      />
-                    </label>
+                    {timed ? (
+                      <>
+                        <label>
+                          <span>Min</span>
+                          <input
+                            inputMode="numeric"
+                            type="number"
+                            min={0}
+                            max={120}
+                            value={Math.floor(totalSeconds / 60)}
+                            onChange={(event) => {
+                              const minutes = Math.min(120, Math.max(0, Number(event.target.value) || 0));
+                              const seconds = totalSeconds % 60;
+                              onDrafts({
+                                ...drafts,
+                                [exercise.exerciseId]: { ...draft, reps: String(minutes * 60 + seconds), weight: "0" },
+                              });
+                            }}
+                          />
+                        </label>
+                        <label>
+                          <span>Seg</span>
+                          <input
+                            inputMode="numeric"
+                            type="number"
+                            min={0}
+                            max={59}
+                            value={totalSeconds % 60}
+                            onChange={(event) => {
+                              const seconds = Math.min(59, Math.max(0, Number(event.target.value) || 0));
+                              const minutes = Math.floor(totalSeconds / 60);
+                              onDrafts({
+                                ...drafts,
+                                [exercise.exerciseId]: { ...draft, reps: String(minutes * 60 + seconds), weight: "0" },
+                              });
+                            }}
+                          />
+                        </label>
+                      </>
+                    ) : (
+                      <>
+                        <label>
+                          <span>Reps</span>
+                          <input
+                            inputMode="numeric"
+                            type="number"
+                            min={0}
+                            value={draft.reps}
+                            onChange={(event) =>
+                              onDrafts({ ...drafts, [exercise.exerciseId]: { ...draft, reps: event.target.value } })
+                            }
+                            required
+                          />
+                        </label>
+                        <label>
+                          <span>Kg</span>
+                          <input
+                            inputMode="decimal"
+                            type="number"
+                            min={0}
+                            step="0.5"
+                            value={draft.weight}
+                            onChange={(event) =>
+                              onDrafts({ ...drafts, [exercise.exerciseId]: { ...draft, weight: event.target.value } })
+                            }
+                            required
+                          />
+                        </label>
+                      </>
+                    )}
                     <label>
                       <span>Esf.</span>
                       <select
@@ -641,6 +692,7 @@ function DayLog({
   routineExercises: RoutineExercise[];
 }) {
   const muscleOf = new Map(routineExercises.map((exercise) => [exercise.exerciseId, exercise.muscleGroup]));
+  const timedOf = new Map(routineExercises.map((exercise) => [exercise.exerciseId, exercise.measure === "TIEMPO"]));
   const grouped = new Map<string, Map<string, WorkoutLog[]>>();
   for (const log of [...logs].sort((a, b) => a.setNumber - b.setNumber)) {
     const muscle = muscleOf.get(log.exerciseId) ?? "OTROS";
@@ -664,7 +716,8 @@ function DayLog({
               <ul>
                 {sets.map((log) => (
                   <li key={log.id}>
-                    Serie {log.setNumber} · {log.repsCompleted} reps · {formatKg(log.weightKg)}
+                    Serie {log.setNumber} ·{" "}
+                    {timedOf.get(log.exerciseId) ? formatDuration(log.repsCompleted) : `${log.repsCompleted} reps · ${formatKg(log.weightKg)}`}
                     {log.rpe ? ` · esfuerzo ${log.rpe}` : ""}
                   </li>
                 ))}

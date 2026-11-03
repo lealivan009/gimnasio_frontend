@@ -1786,6 +1786,7 @@ a.btn-ghost {
   }
 
   .form-grid.triple,
+  .form-grid.quad,
   .gym-charts,
   .stat-grid,
   .set-form {
@@ -1836,6 +1837,10 @@ textarea {
 
 .form-grid.triple {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.form-grid.quad {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .routine-builder,
@@ -2832,6 +2837,7 @@ a.btn-ghost {
 
 @media (max-width: 900px) {
   .form-grid.triple,
+  .form-grid.quad,
   .gym-charts,
   .stat-grid,
   .set-form {

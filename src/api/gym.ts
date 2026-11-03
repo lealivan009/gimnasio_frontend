@@ -83,6 +83,26 @@ export interface Occupancy {
   openNow: boolean;
 }
 
+export type ExerciseMeasure = "PESO" | "TIEMPO";
+
+export function formatDuration(totalSeconds: number) {
+  const seconds = Math.max(0, Math.round(totalSeconds));
+  const minutes = Math.floor(seconds / 60);
+  const rest = seconds % 60;
+  if (minutes <= 0) {
+    return `${rest} s`;
+  }
+  if (rest === 0) {
+    return `${minutes} min`;
+  }
+  return `${minutes} min ${rest} s`;
+}
+
+export function exerciseTarget(sets: number, reps: number, restSeconds: number, measure?: ExerciseMeasure | null) {
+  const effort = measure === "TIEMPO" ? formatDuration(reps) : String(reps);
+  return `${sets}×${effort} · ${restSeconds}s`;
+}
+
 export interface Exercise {
   id: string;
   name: string;
@@ -90,6 +110,7 @@ export interface Exercise {
   muscleGroup: MuscleGroup;
   videoUrl: string | null;
   createdAt: string;
+  measure?: ExerciseMeasure | null;
 }
 
 export interface ExerciseInput {
@@ -97,6 +118,7 @@ export interface ExerciseInput {
   description?: string | null;
   muscleGroup: MuscleGroup;
   videoUrl?: string | null;
+  measure?: ExerciseMeasure | null;
 }
 
 export interface Instructor {
@@ -164,6 +186,7 @@ export interface RoutineExercise {
   notes: string | null;
   dayNumber: number;
   dayLabel: string | null;
+  measure?: ExerciseMeasure | null;
 }
 
 export interface Routine {
@@ -244,6 +267,7 @@ export interface ProgressPoint {
   maxWeightKg: number;
   volumeKg: number;
   sets: number;
+  maxSeconds?: number | null;
 }
 
 export interface PersonalRecord {
@@ -251,6 +275,8 @@ export interface PersonalRecord {
   exerciseName: string;
   maxWeightKg: number;
   achievedAt: string;
+  measure?: ExerciseMeasure | null;
+  maxSeconds?: number | null;
 }
 
 export interface StatsSummary {

@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "../api/client";
-import { MUSCLE_GROUPS, MUSCLE_LABELS, type MuscleGroup } from "../api/gym";
+import { MUSCLE_GROUPS, MUSCLE_LABELS, type ExerciseMeasure, type MuscleGroup } from "../api/gym";
 
 export function ExerciseFormPage() {
   const { id } = useParams();
@@ -9,6 +9,7 @@ export function ExerciseFormPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [muscleGroup, setMuscleGroup] = useState<MuscleGroup>("PECHO");
+  const [measure, setMeasure] = useState<ExerciseMeasure>("PESO");
   const [videoUrl, setVideoUrl] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(Boolean(id));
@@ -28,6 +29,7 @@ export function ExerciseFormPage() {
         setName(exercise.name);
         setDescription(exercise.description ?? "");
         setMuscleGroup(exercise.muscleGroup);
+        setMeasure(exercise.measure === "TIEMPO" ? "TIEMPO" : "PESO");
         setVideoUrl(exercise.videoUrl ?? "");
       })
       .catch((err) => {
@@ -54,6 +56,7 @@ export function ExerciseFormPage() {
       description: description.trim() || null,
       muscleGroup,
       videoUrl: videoUrl.trim() || null,
+      measure,
     };
     try {
       if (id) {
@@ -97,7 +100,15 @@ export function ExerciseFormPage() {
               ))}
             </select>
           </label>
+          <label className="field">
+            <span className="field-label">Se mide en</span>
+            <select value={measure} onChange={(event) => setMeasure(event.target.value as ExerciseMeasure)}>
+              <option value="PESO">Peso y repeticiones</option>
+              <option value="TIEMPO">Tiempo</option>
+            </select>
+          </label>
         </div>
+        <p className="hint left">La bici o la plancha van en tiempo. El press y el curl, en peso.</p>
         <label className="field">
           <span className="field-label">Descripción</span>
           <textarea
