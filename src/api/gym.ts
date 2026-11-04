@@ -279,6 +279,7 @@ export interface PersonalRecord {
   achievedAt: string;
   measure?: ExerciseMeasure | null;
   maxSeconds?: number | null;
+  muscleGroup?: MuscleGroup | null;
 }
 
 export interface StatsSummary {

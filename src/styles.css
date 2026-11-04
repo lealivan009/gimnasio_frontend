@@ -2059,6 +2059,14 @@ textarea {
   text-transform: uppercase;
 }
 
+.record-group + .record-group {
+  margin-top: 18px;
+}
+
+.record-group .eyebrow {
+  margin-bottom: 2px;
+}
+
 .record-list {
   list-style: none;
   margin: 0;

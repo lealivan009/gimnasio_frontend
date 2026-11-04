@@ -4,8 +4,11 @@ import { api } from "../api/client";
 import {
   formatDate,
   formatDuration,
+  MUSCLE_GROUPS,
+  MUSCLE_LABELS,
   todayIso,
   type CalendarDay,
+  type PersonalRecord,
   type ProgressPoint,
   type StatsSummary,
   type StudentFollow,
@@ -138,6 +141,28 @@ export function ProgressPage() {
 
   const today = todayIso();
 
+function looseRecords(records: PersonalRecord[]) {
+  const loose = records
+    .filter((record) => !record.muscleGroup || !MUSCLE_GROUPS.some((group) => group === record.muscleGroup))
+    .sort((left, right) => left.exerciseName.localeCompare(right.exerciseName, "es"));
+  if (loose.length === 0) {
+    return [];
+  }
+  return [{ key: "otros", label: records.some((record) => record.muscleGroup) ? "Otros" : "", records: loose }];
+}
+  const recordSections = summary
+    ? [
+        ...MUSCLE_GROUPS.filter((group) => summary.records.some((record) => record.muscleGroup === group)).map((group) => ({
+          key: group,
+          label: MUSCLE_LABELS[group],
+          records: summary.records
+            .filter((record) => record.muscleGroup === group)
+            .sort((left, right) => left.exerciseName.localeCompare(right.exerciseName, "es")),
+        })),
+        ...looseRecords(summary.records),
+      ]
+    : [];
+
   return (
     <>
       <Toast message={notice} onClose={() => setNotice(null)} />
@@ -168,60 +193,65 @@ export function ProgressPage() {
       <section className="session-card">
         <h2>Marcas personales</h2>
         {summary && summary.records.length > 0 ? (
-          <ul className="record-list">
-            {summary.records.map((record) => {
-              const open = exerciseId === record.exerciseId;
-              return (
-                <li key={record.exerciseId} className={open ? "is-open" : undefined}>
-                  <button
-                    type="button"
-                    className="record-row"
-                    aria-expanded={open}
-                    onClick={() => setExerciseId(open ? "" : record.exerciseId)}
-                  >
-                    <div className="record-copy">
-                      <strong>{record.exerciseName}</strong>
-                      <span>{formatDate(record.achievedAt.slice(0, 10))}</span>
-                    </div>
-                    <span className="record-kg">
-                      {record.measure === "TIEMPO" ? (
-                        formatDuration(record.maxSeconds ?? 0)
-                      ) : (
-                        <>
-                          {new Intl.NumberFormat("es-AR", { maximumFractionDigits: 2 }).format(Number(record.maxWeightKg))}
-                          <small>kg</small>
-                        </>
-                      )}
-                    </span>
-                  </button>
-                  {open ? (
-                    <div className="record-chart">
-                      <h3>{record.measure === "TIEMPO" ? "Duración máxima" : "Peso máximo"}</h3>
-                      {series?.exerciseId === record.exerciseId ? (
-                        <LineChart
-                          label={
-                            record.measure === "TIEMPO"
-                              ? `Duración máxima de ${record.exerciseName}`
-                              : `Peso máximo de ${record.exerciseName}`
-                          }
-                          unit={record.measure === "TIEMPO" ? "s" : "kg"}
-                          points={series.points.map((point) => ({
-                            label: formatDate(point.date),
-                            value:
-                              record.measure === "TIEMPO" ? Number(point.maxSeconds ?? 0) : Number(point.maxWeightKg),
-                          }))}
-                        />
-                      ) : (
-                        <p className="lede">Cargando…</p>
-                      )}
-                    </div>
-                  ) : null}
-                </li>
-              );
-            })}
-          </ul>
+          recordSections.map((group) => (
+            <section className="record-group" key={group.key}>
+              {group.label ? <p className="eyebrow">{group.label}</p> : null}
+              <ul className="record-list">
+                {group.records.map((record) => {
+                    const open = exerciseId === record.exerciseId;
+                    return (
+                      <li key={record.exerciseId} className={open ? "is-open" : undefined}>
+                        <button
+                          type="button"
+                          className="record-row"
+                          aria-expanded={open}
+                          onClick={() => setExerciseId(open ? "" : record.exerciseId)}
+                        >
+                          <div className="record-copy">
+                            <strong>{record.exerciseName}</strong>
+                            <span>{formatDate(record.achievedAt.slice(0, 10))}</span>
+                          </div>
+                          <span className="record-kg">
+                            {record.measure === "TIEMPO" ? (
+                              formatDuration(record.maxSeconds ?? 0)
+                            ) : (
+                              <>
+                                {new Intl.NumberFormat("es-AR", { maximumFractionDigits: 2 }).format(Number(record.maxWeightKg))}
+                                <small>kg</small>
+                              </>
+                            )}
+                          </span>
+                        </button>
+                        {open ? (
+                          <div className="record-chart">
+                            <h3>{record.measure === "TIEMPO" ? "Duración máxima" : "Peso máximo"}</h3>
+                            {series?.exerciseId === record.exerciseId ? (
+                              <LineChart
+                                label={
+                                  record.measure === "TIEMPO"
+                                    ? `Duración máxima de ${record.exerciseName}`
+                                    : `Peso máximo de ${record.exerciseName}`
+                                }
+                                unit={record.measure === "TIEMPO" ? "s" : "kg"}
+                                points={series.points.map((point) => ({
+                                  label: formatDate(point.date),
+                                  value:
+                                    record.measure === "TIEMPO" ? Number(point.maxSeconds ?? 0) : Number(point.maxWeightKg),
+                                }))}
+                              />
+                            ) : (
+                              <p className="lede">Cargando…</p>
+                            )}
+                          </div>
+                        ) : null}
+                      </li>
+                    );
+                  })}
+              </ul>
+            </section>
+          ))
         ) : (
-          <p className="lede">Todavía no hay récords de peso.</p>
+          <p className="lede">Todavía no hay marcas.</p>
         )}
       </section>
 
