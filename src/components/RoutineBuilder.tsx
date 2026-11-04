@@ -3,6 +3,14 @@ import type { Exercise, MuscleGroup, RoutineExercise, RoutineExerciseInput } fro
 import { dayTitle, exerciseTarget, MUSCLE_GROUPS, MUSCLE_LABELS, routineDays } from "../api/gym";
 import { ExerciseHowTo } from "./ExerciseHowTo";
 
+function clampTime(raw: string, max: number) {
+  const digits = raw.replace(/\D/g, "");
+  if (!digits) {
+    return 0;
+  }
+  return Math.min(max, Number(digits));
+}
+
 function isTimed(catalog: Exercise[], exerciseId: string) {
   return catalog.find((item) => item.id === exerciseId)?.measure === "TIEMPO";
 }
@@ -345,31 +353,25 @@ export function RoutineBuilder({
                     <label className="field">
                       <span className="field-label">Minutos</span>
                       <input
-                        type="number"
-                        min={0}
-                        max={120}
-                        value={Math.floor((Number(row.targetReps) || 0) / 60)}
+                        inputMode="numeric"
+                        value={String(Math.floor((Number(row.targetReps) || 0) / 60))}
                         onChange={(event) => {
-                          const minutes = Math.min(120, Math.max(0, Number(event.target.value) || 0));
+                          const minutes = clampTime(event.target.value, 120);
                           const seconds = (Number(row.targetReps) || 0) % 60;
                           updateRow(day.key, row.key, { targetReps: String(minutes * 60 + seconds) });
                         }}
-                        required
                       />
                     </label>
                     <label className="field">
                       <span className="field-label">Segundos</span>
                       <input
-                        type="number"
-                        min={0}
-                        max={59}
-                        value={(Number(row.targetReps) || 0) % 60}
+                        inputMode="numeric"
+                        value={String((Number(row.targetReps) || 0) % 60)}
                         onChange={(event) => {
-                          const seconds = Math.min(59, Math.max(0, Number(event.target.value) || 0));
+                          const seconds = clampTime(event.target.value, 59);
                           const minutes = Math.floor((Number(row.targetReps) || 0) / 60);
                           updateRow(day.key, row.key, { targetReps: String(minutes * 60 + seconds) });
                         }}
-                        required
                       />
                     </label>
                   </>

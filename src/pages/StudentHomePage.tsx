@@ -29,6 +29,14 @@ import { Toast } from "../components/Toast";
 import { weekdayIndex } from "../gym/hours";
 import { beep, unlockSound } from "../gym/sound";
 
+function clampTime(raw: string, max: number) {
+  const digits = raw.replace(/\D/g, "");
+  if (!digits) {
+    return 0;
+  }
+  return Math.min(max, Number(digits));
+}
+
 function monthStart(year: number, month: number) {
   return `${year}-${String(month).padStart(2, "0")}-01`;
 }
@@ -558,6 +566,7 @@ function TrainingDay({
                   {present ? (
                   <form
                     className="set-form"
+                    noValidate
                     onSubmit={(event) => onLog(event, exercise.exerciseId, exercise.targetRestSeconds, exercise.exerciseName, timed)}
                   >
                     {timed ? (
@@ -566,12 +575,9 @@ function TrainingDay({
                           <span>Min</span>
                           <input
                             inputMode="numeric"
-                            type="number"
-                            min={0}
-                            max={120}
-                            value={Math.floor(totalSeconds / 60)}
+                            value={String(Math.floor(totalSeconds / 60))}
                             onChange={(event) => {
-                              const minutes = Math.min(120, Math.max(0, Number(event.target.value) || 0));
+                              const minutes = clampTime(event.target.value, 120);
                               const seconds = totalSeconds % 60;
                               onDrafts({
                                 ...drafts,
@@ -584,12 +590,9 @@ function TrainingDay({
                           <span>Seg</span>
                           <input
                             inputMode="numeric"
-                            type="number"
-                            min={0}
-                            max={59}
-                            value={totalSeconds % 60}
+                            value={String(totalSeconds % 60)}
                             onChange={(event) => {
-                              const seconds = Math.min(59, Math.max(0, Number(event.target.value) || 0));
+                              const seconds = clampTime(event.target.value, 59);
                               const minutes = Math.floor(totalSeconds / 60);
                               onDrafts({
                                 ...drafts,
