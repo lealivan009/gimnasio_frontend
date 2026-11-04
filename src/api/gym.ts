@@ -240,6 +240,7 @@ export interface WorkoutLog {
   loggedDate: string;
   dayNumber: number | null;
   dayLabel: string | null;
+  durationSeconds?: number | null;
 }
 
 export interface WorkoutInput {
@@ -252,6 +253,7 @@ export interface WorkoutInput {
   dayNumber?: number | null;
   dayLabel?: string | null;
   loggedDate?: string | null;
+  durationSeconds?: number | null;
 }
 
 export interface Attendance {

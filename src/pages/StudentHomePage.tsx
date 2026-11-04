@@ -187,8 +187,9 @@ export function StudentHomePage() {
         exerciseId,
         routineId: active?.routine?.id,
         setNumber: done + 1,
-        repsCompleted: Number(draft.reps),
+        repsCompleted: timed ? 0 : Number(draft.reps),
         weightKg: timed ? 0 : Number(draft.weight),
+        durationSeconds: timed ? Number(draft.reps) : null,
         rpe: draft.rpe ? Number(draft.rpe) : null,
         dayNumber: loggingDay,
         dayLabel: day?.label ?? null,
@@ -547,7 +548,7 @@ function TrainingDay({
                         <li key={log.id}>
                           <strong>{log.setNumber}</strong>
                           <span>
-                            {timed ? formatDuration(log.repsCompleted) : `${log.repsCompleted}×${formatKg(log.weightKg)}`}
+                            {timed ? formatDuration(log.durationSeconds ?? 0) : `${log.repsCompleted}×${formatKg(log.weightKg)}`}
                             {log.rpe ? ` · ${log.rpe}` : ""}
                           </span>
                         </li>
@@ -717,7 +718,9 @@ function DayLog({
                 {sets.map((log) => (
                   <li key={log.id}>
                     Serie {log.setNumber} ·{" "}
-                    {timedOf.get(log.exerciseId) ? formatDuration(log.repsCompleted) : `${log.repsCompleted} reps · ${formatKg(log.weightKg)}`}
+                    {timedOf.get(log.exerciseId)
+                      ? formatDuration(log.durationSeconds ?? 0)
+                      : `${log.repsCompleted} reps · ${formatKg(log.weightKg)}`}
                     {log.rpe ? ` · esfuerzo ${log.rpe}` : ""}
                   </li>
                 ))}
