@@ -2346,6 +2346,52 @@ textarea {
   margin-top: 14px;
 }
 
+.day-work-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.day-work-head h3,
+.day-work-head p {
+  margin: 0;
+}
+
+.day-work-head h3 {
+  font-size: 1.05rem;
+}
+
+.day-work-head p {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.day-work-list {
+  margin-top: 8px;
+}
+
+.day-work-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 9px 0;
+  border-top: 1px solid var(--line);
+}
+
+.day-work-row strong {
+  font-weight: 600;
+}
+
+.day-work-row span {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: right;
+}
+
 .muscle-block {
   display: grid;
   gap: 8px;

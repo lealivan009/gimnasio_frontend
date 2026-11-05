@@ -35,11 +35,24 @@ function sessionTitle(log: WorkoutLog) {
   return "Entrenamiento";
 }
 
-function setLine(log: WorkoutLog) {
-  const effort = log.durationSeconds != null && log.durationSeconds > 0
-    ? formatDuration(log.durationSeconds)
-    : `${log.repsCompleted} reps · ${formatKg(log.weightKg)}`;
-  return `Serie ${log.setNumber} · ${effort}${log.rpe ? ` · esfuerzo ${log.rpe}` : ""}`;
+function setsSummary(sets: WorkoutLog[]) {
+  const timed = sets.some((set) => (set.durationSeconds ?? 0) > 0);
+  if (timed) {
+    const parts = sets.map((set) => formatDuration(set.durationSeconds ?? 0));
+    return parts.every((part) => part === parts[0]) && sets.length > 1 ? `${sets.length} × ${parts[0]}` : parts.join(" · ");
+  }
+  const sameReps = sets.every((set) => set.repsCompleted === sets[0].repsCompleted);
+  const sameWeight = sets.every((set) => Number(set.weightKg) === Number(sets[0].weightKg));
+  if (sameReps && sameWeight) {
+    const weight = Number(sets[0].weightKg);
+    return `${sets.length} × ${sets[0].repsCompleted}${weight > 0 ? ` · ${formatKg(weight)}` : ""}`;
+  }
+  return sets
+    .map((set) => {
+      const weight = Number(set.weightKg);
+      return weight > 0 ? `${set.repsCompleted} × ${formatKg(weight)}` : `${set.repsCompleted} reps`;
+    })
+    .join(" · ");
 }
 
 export function StudentCalendarPage() {
@@ -186,34 +199,34 @@ export function StudentCalendarPage() {
             onSelect={setSelectedDate}
           />
           <p className="hint left">Tocá un día para ver si fue y qué hizo. Desde acá no se marca la asistencia.</p>
-          <div className="day-log">
-            <h3 className="day-log-title">{formatDate(selectedDate)}</h3>
-            {loadingDay ? <p className="lede">Cargando…</p> : null}
-            {!loadingDay && went ? (
-              <p className="lede">
-                Fue a las {visits.map((visit) => attendanceTime(visit.checkInTime)).join(", ")}.
-              </p>
-            ) : null}
-            {!loadingDay && !went && !trained ? <p className="lede">Ese día no fue.</p> : null}
-            {!loadingDay && !went && trained ? <p className="lede">No marcó presente.</p> : null}
+          <div className="day-work">
+            <div className="day-work-head">
+              <h3>{formatDate(selectedDate)}</h3>
+              {loadingDay ? <p>Cargando…</p> : null}
+              {!loadingDay && went ? (
+                <p>
+                  Fue a las {visits.map((visit) => attendanceTime(visit.checkInTime)).join(", ")}
+                  {trained ? "" : " · no cargó ejercicios"}
+                </p>
+              ) : null}
+              {!loadingDay && !went && trained ? <p>No marcó presente</p> : null}
+              {!loadingDay && !went && !trained ? <p>Ese día no fue</p> : null}
+            </div>
             {!loadingDay && trained
               ? [...sessions.entries()].map(([title, exercises]) => (
                   <section className="muscle-block" key={title}>
                     <p className="eyebrow">{title}</p>
-                    {[...exercises.entries()].map(([exerciseId, sets]) => (
-                      <article className="exercise-sets" key={exerciseId}>
-                        <strong>{sets[0]?.exerciseName}</strong>
-                        <ul>
-                          {sets.map((log) => (
-                            <li key={log.id}>{setLine(log)}</li>
-                          ))}
-                        </ul>
-                      </article>
-                    ))}
+                    <div className="day-work-list">
+                      {[...exercises.entries()].map(([exerciseId, sets]) => (
+                        <div className="day-work-row" key={exerciseId}>
+                          <strong>{sets[0]?.exerciseName}</strong>
+                          <span>{setsSummary(sets)}</span>
+                        </div>
+                      ))}
+                    </div>
                   </section>
                 ))
               : null}
-            {!loadingDay && went && !trained ? <p className="lede">No cargó ejercicios.</p> : null}
           </div>
         </>
       ) : null}
