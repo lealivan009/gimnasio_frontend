@@ -1378,7 +1378,39 @@ a.btn-ghost {
 }
 
 .users-table td.actions {
+  white-space: nowrap;
   text-align: right;
+}
+
+.row-icons {
+  display: inline-flex;
+  gap: 2px;
+  vertical-align: middle;
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  color: var(--accent);
+  border-radius: 8px;
+}
+
+.icon-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.icon-btn:hover {
+  background: var(--accent-soft);
+  text-decoration: none;
 }
 
 .users-table td.actions > * + * {

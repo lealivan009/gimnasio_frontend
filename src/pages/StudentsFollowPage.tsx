@@ -190,12 +190,20 @@ export function StudentsFollowPage() {
                       ) : (
                         <span className="pill off">Cerrado</span>
                       )}
-                      <Link className="text-btn" to={`/admin/alumnos/${student.id}`}>
-                        Ver calendario
-                      </Link>
-                      <Link className="text-btn" to={`/admin/progreso?alumno=${student.id}`}>
-                        Ver progreso
-                      </Link>
+                      <span className="row-icons">
+                        <Link className="icon-btn" to={`/admin/alumnos/${student.id}`} aria-label="Ver calendario" title="Ver calendario">
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <rect x="3.5" y="5" width="17" height="15" rx="2" />
+                            <path d="M3.5 10h17M8 3.5v3M16 3.5v3" />
+                          </svg>
+                        </Link>
+                        <Link className="icon-btn" to={`/admin/progreso?alumno=${student.id}`} aria-label="Ver progreso" title="Ver progreso">
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M4 19V5M4 19h16" />
+                            <path d="M7 15l4-4 3 2 5-6" />
+                          </svg>
+                        </Link>
+                      </span>
                     </td>
                   </tr>
                   );
