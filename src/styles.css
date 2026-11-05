@@ -2404,6 +2404,14 @@ textarea {
   white-space: nowrap;
 }
 
+@media (max-width: 900px) {
+  .day-work-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
 .muscle-block {
   display: grid;
   gap: 8px;
