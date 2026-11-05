@@ -2,12 +2,15 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { api } from "../api/client";
 import {
+  MUSCLE_GROUPS,
+  MUSCLE_LABELS,
   formatDate,
   formatDuration,
   formatKg,
   todayIso,
   type Attendance,
   type CalendarDay,
+  type MuscleGroup,
   type StudentFollow,
   type WorkoutLog,
 } from "../api/gym";
@@ -51,6 +54,7 @@ export function StudentCalendarPage() {
   const [days, setDays] = useState<CalendarDay[]>([]);
   const [selectedDate, setSelectedDate] = useState(todayIso());
   const [logs, setLogs] = useState<WorkoutLog[]>([]);
+  const [muscles, setMuscles] = useState<Map<string, MuscleGroup> | null>(null);
   const [visits, setVisits] = useState<Attendance[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -81,6 +85,25 @@ export function StudentCalendarPage() {
       cancelled = true;
     };
   }, [id]);
+
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .listExercises()
+      .then((list) => {
+        if (!cancelled) {
+          setMuscles(new Map(list.map((exercise) => [exercise.id, exercise.muscleGroup])));
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setMuscles(new Map());
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (!student) {
@@ -148,14 +171,18 @@ export function StudentCalendarPage() {
     setMonth(next.getMonth() + 1);
   }
 
-  const sessions = new Map<string, Map<string, WorkoutLog[]>>();
+  const sessions = new Map<string, Map<string, Map<string, WorkoutLog[]>>>();
   for (const log of [...logs].sort((left, right) => left.setNumber - right.setNumber)) {
     const title = sessionTitle(log);
-    const exercises = sessions.get(title) ?? new Map<string, WorkoutLog[]>();
+    const muscle = muscles?.get(log.exerciseId);
+    const category = muscle && MUSCLE_GROUPS.includes(muscle) ? muscle : "OTROS";
+    const byMuscle = sessions.get(title) ?? new Map<string, Map<string, WorkoutLog[]>>();
+    const exercises = byMuscle.get(category) ?? new Map<string, WorkoutLog[]>();
     const sets = exercises.get(log.exerciseId) ?? [];
     sets.push(log);
     exercises.set(log.exerciseId, sets);
-    sessions.set(title, exercises);
+    byMuscle.set(category, exercises);
+    sessions.set(title, byMuscle);
   }
   const went = visits.length > 0;
   const trained = logs.length > 0;
@@ -199,24 +226,34 @@ export function StudentCalendarPage() {
               {!loadingDay && !went && trained ? <p>No marcó presente</p> : null}
               {!loadingDay && !went && !trained ? <p>Ese día no fue</p> : null}
             </div>
-            {!loadingDay && trained
-              ? [...sessions.entries()].map(([title, exercises]) => (
-                  <section className="muscle-block" key={title}>
-                    <p className="eyebrow">{title}</p>
-                    <div className="day-work-list">
-                      {[...exercises.entries()].map(([exerciseId, sets]) => (
-                        <div className="day-work-row" key={exerciseId}>
-                          <strong>{sets[0]?.exerciseName}</strong>
-                          <span className="set-chips">
-                            {sets.map((log) => (
-                              <span className="set-chip" key={log.id}>
-                                {setLabel(log)}
-                              </span>
+            {!loadingDay && trained && !muscles ? <p className="lede">Cargando…</p> : null}
+            {!loadingDay && muscles && trained
+              ? [...sessions.entries()].map(([title, byMuscle]) => (
+                  <section key={title}>
+                    <h3 className="day-log-title">{title}</h3>
+                    {(["PECHO", "ESPALDA", "PIERNAS", "BRAZOS", "HOMBROS", "CORE", "CARDIO", "OTROS"] as const)
+                      .filter((category) => byMuscle.has(category))
+                      .map((category) => (
+                        <section className="muscle-block" key={category}>
+                          <p className="eyebrow">
+                            {category === "OTROS" ? "Otros" : MUSCLE_LABELS[category]}
+                          </p>
+                          <div className="day-work-list">
+                            {[...(byMuscle.get(category)?.entries() ?? [])].map(([exerciseId, sets]) => (
+                              <div className="day-work-row" key={exerciseId}>
+                                <strong>{sets[0]?.exerciseName}</strong>
+                                <span className="set-chips">
+                                  {sets.map((log) => (
+                                    <span className="set-chip" key={log.id}>
+                                      {setLabel(log)}
+                                    </span>
+                                  ))}
+                                </span>
+                              </div>
                             ))}
-                          </span>
-                        </div>
+                          </div>
+                        </section>
                       ))}
-                    </div>
                   </section>
                 ))
               : null}

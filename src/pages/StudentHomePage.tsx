@@ -747,20 +747,19 @@ function DayLog({
         <section className="muscle-block" key={muscle}>
           <p className="eyebrow">{muscle in MUSCLE_LABELS ? MUSCLE_LABELS[muscle as keyof typeof MUSCLE_LABELS] : "Otros"}</p>
           {[...(grouped.get(muscle)?.entries() ?? [])].map(([exerciseId, sets]) => (
-            <article className="exercise-sets" key={exerciseId}>
+            <div className="day-work-row" key={exerciseId}>
               <strong>{sets[0]?.exerciseName}</strong>
-              <ul>
+              <span className="set-chips">
                 {sets.map((log) => (
-                  <li key={log.id}>
-                    Serie {log.setNumber} ·{" "}
+                  <span className="set-chip" key={log.id}>
                     {timedOf.get(log.exerciseId)
                       ? formatDuration(log.durationSeconds ?? 0)
-                      : `${log.repsCompleted} reps · ${formatKg(log.weightKg)}`}
-                    {log.rpe ? ` · esfuerzo ${log.rpe}` : ""}
-                  </li>
+                      : `${log.repsCompleted} × ${formatKg(log.weightKg)}`}
+                    {log.rpe ? ` · ${log.rpe}` : ""}
+                  </span>
                 ))}
-              </ul>
-            </article>
+              </span>
+            </div>
           ))}
         </section>
       ))}
