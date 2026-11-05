@@ -35,24 +35,11 @@ function sessionTitle(log: WorkoutLog) {
   return "Entrenamiento";
 }
 
-function setsSummary(sets: WorkoutLog[]) {
-  const timed = sets.some((set) => (set.durationSeconds ?? 0) > 0);
-  if (timed) {
-    const parts = sets.map((set) => formatDuration(set.durationSeconds ?? 0));
-    return parts.every((part) => part === parts[0]) && sets.length > 1 ? `${sets.length} × ${parts[0]}` : parts.join(" · ");
+function setLabel(log: WorkoutLog) {
+  if ((log.durationSeconds ?? 0) > 0) {
+    return formatDuration(log.durationSeconds ?? 0);
   }
-  const sameReps = sets.every((set) => set.repsCompleted === sets[0].repsCompleted);
-  const sameWeight = sets.every((set) => Number(set.weightKg) === Number(sets[0].weightKg));
-  if (sameReps && sameWeight) {
-    const weight = Number(sets[0].weightKg);
-    return `${sets.length} × ${sets[0].repsCompleted}${weight > 0 ? ` · ${formatKg(weight)}` : ""}`;
-  }
-  return sets
-    .map((set) => {
-      const weight = Number(set.weightKg);
-      return weight > 0 ? `${set.repsCompleted} × ${formatKg(weight)}` : `${set.repsCompleted} reps`;
-    })
-    .join(" · ");
+  return `${log.repsCompleted} × ${formatKg(log.weightKg)}`;
 }
 
 export function StudentCalendarPage() {
@@ -220,7 +207,14 @@ export function StudentCalendarPage() {
                       {[...exercises.entries()].map(([exerciseId, sets]) => (
                         <div className="day-work-row" key={exerciseId}>
                           <strong>{sets[0]?.exerciseName}</strong>
-                          <span>{setsSummary(sets)}</span>
+                          <span className="set-chips">
+                            {sets.map((log) => (
+                              <span className="set-chip" key={log.id}>
+                                <small>{log.setNumber}</small>
+                                {setLabel(log)}
+                              </span>
+                            ))}
+                          </span>
                         </div>
                       ))}
                     </div>

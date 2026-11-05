@@ -2374,9 +2374,10 @@ textarea {
 
 .day-work-row {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
-  align-items: baseline;
-  gap: 16px;
+  align-items: center;
+  gap: 8px 16px;
   padding: 9px 0;
   border-top: 1px solid var(--line);
 }
@@ -2385,11 +2386,26 @@ textarea {
   font-weight: 600;
 }
 
-.day-work-row span {
-  flex: 0 0 auto;
-  color: var(--muted);
+.set-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.set-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--bg-elev);
+  color: var(--text);
   font-size: 13px;
-  text-align: right;
+}
+
+.set-chip small {
+  color: var(--muted);
+  font-size: 11px;
 }
 
 .muscle-block {
