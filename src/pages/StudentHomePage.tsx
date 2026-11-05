@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "../api/client";
 import {
   DAY_LABELS,
@@ -168,7 +168,14 @@ export function StudentHomePage() {
     }
   }
 
-  async function onLog(event: FormEvent, exerciseId: string, restSeconds: number, exerciseName: string, timed: boolean) {
+  async function onLog(
+    event: { preventDefault: () => void },
+    exerciseId: string,
+    restSeconds: number,
+    exerciseName: string,
+    timed: boolean,
+    durationSeconds = 0
+  ) {
     event.preventDefault();
     unlockSound();
     if (logDate > today) {
@@ -184,7 +191,7 @@ export function StudentHomePage() {
       return;
     }
     const draft = drafts[exerciseId] ?? { reps: "", weight: "", rpe: "" };
-    if (timed && (Number(draft.reps) || 0) < 1) {
+    if (timed && durationSeconds < 1) {
       setError("Indicá cuánto tiempo hiciste.");
       return;
     }
@@ -197,7 +204,7 @@ export function StudentHomePage() {
         setNumber: done + 1,
         repsCompleted: timed ? 0 : Number(draft.reps),
         weightKg: timed ? 0 : Number(draft.weight),
-        durationSeconds: timed ? Number(draft.reps) : null,
+        durationSeconds: timed ? durationSeconds : null,
         rpe: draft.rpe ? Number(draft.rpe) : null,
         dayNumber: loggingDay,
         dayLabel: day?.label ?? null,
@@ -478,7 +485,14 @@ function TrainingDay({
   onChoose: (dayNumber: number) => void;
   onStart: () => void;
   onClose: () => void;
-  onLog: (event: FormEvent, exerciseId: string, restSeconds: number, exerciseName: string, timed: boolean) => Promise<void>;
+  onLog: (
+    event: { preventDefault: () => void },
+    exerciseId: string,
+    restSeconds: number,
+    exerciseName: string,
+    timed: boolean,
+    durationSeconds?: number
+  ) => Promise<void>;
   logDate: string;
   present: boolean;
 }) {
@@ -567,7 +581,9 @@ function TrainingDay({
                   <form
                     className="set-form"
                     noValidate
-                    onSubmit={(event) => onLog(event, exercise.exerciseId, exercise.targetRestSeconds, exercise.exerciseName, timed)}
+                    onSubmit={(event) =>
+                      onLog(event, exercise.exerciseId, exercise.targetRestSeconds, exercise.exerciseName, timed, totalSeconds)
+                    }
                   >
                     {timed ? (
                       <>
@@ -649,7 +665,24 @@ function TrainingDay({
                         ))}
                       </select>
                     </label>
-                    <button className="btn-primary" type="submit" disabled={busyId === exercise.exerciseId}>
+                    <button
+                      className="btn-primary"
+                      type="button"
+                      disabled={busyId === exercise.exerciseId}
+                      onClick={(event) => {
+                        if (!timed && !event.currentTarget.form?.reportValidity()) {
+                          return;
+                        }
+                        void onLog(
+                          event,
+                          exercise.exerciseId,
+                          exercise.targetRestSeconds,
+                          exercise.exerciseName,
+                          timed,
+                          totalSeconds
+                        );
+                      }}
+                    >
                       Serie {done.length + 1}
                     </button>
                   </form>
