@@ -2394,18 +2394,14 @@ textarea {
 
 .set-chip {
   display: inline-flex;
-  align-items: baseline;
-  gap: 6px;
-  padding: 3px 8px;
+  align-items: center;
+  padding: 4px 10px;
+  border: 1px solid var(--line);
   border-radius: 999px;
-  background: var(--bg-elev);
+  background: var(--input-bg);
   color: var(--text);
   font-size: 13px;
-}
-
-.set-chip small {
-  color: var(--muted);
-  font-size: 11px;
+  white-space: nowrap;
 }
 
 .muscle-block {

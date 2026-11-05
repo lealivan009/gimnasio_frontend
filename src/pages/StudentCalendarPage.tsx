@@ -210,7 +210,6 @@ export function StudentCalendarPage() {
                           <span className="set-chips">
                             {sets.map((log) => (
                               <span className="set-chip" key={log.id}>
-                                <small>{log.setNumber}</small>
                                 {setLabel(log)}
                               </span>
                             ))}
