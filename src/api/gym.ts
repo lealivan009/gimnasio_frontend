@@ -371,6 +371,7 @@ export interface StudentFollow {
   routineCustom: boolean;
   lastCheckIn: string | null;
   attendanceLast30Days: number;
+  activeRoutineId?: string | null;
 }
 
 export function formatKg(value: number | string | null | undefined) {

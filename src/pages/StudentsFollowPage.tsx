@@ -150,7 +150,13 @@ export function StudentsFollowPage() {
                     <td>
                       {student.activeRoutineTitle ? (
                         <>
-                          {student.activeRoutineTitle}
+                          {student.activeRoutineId ? (
+                            <Link className="routine-link" to={`/admin/rutinas/${student.activeRoutineId}`}>
+                              {student.activeRoutineTitle}
+                            </Link>
+                          ) : (
+                            student.activeRoutineTitle
+                          )}
                           {student.routineCustom ? <span className="pill custom">Personalizada por el alumno</span> : null}
                           {student.routineStartDate && student.routineStartDate > todayIso() ? (
                             <span className="pill on">Empieza el {formatDate(student.routineStartDate)}</span>
@@ -184,6 +190,9 @@ export function StudentsFollowPage() {
                       ) : (
                         <span className="pill off">Cerrado</span>
                       )}
+                      <Link className="text-btn" to={`/admin/alumnos/${student.id}`}>
+                        Ver calendario
+                      </Link>
                       <Link className="text-btn" to={`/admin/progreso?alumno=${student.id}`}>
                         Ver progreso
                       </Link>

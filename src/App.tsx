@@ -29,6 +29,7 @@ import { StaffRoutineViewPage } from "./pages/StaffRoutineViewPage";
 import { SchedulesPage } from "./pages/SchedulesPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { StudentHomePage } from "./pages/StudentHomePage";
+import { StudentCalendarPage } from "./pages/StudentCalendarPage";
 import { StudentsFollowPage } from "./pages/StudentsFollowPage";
 import { PendingAccountsPage } from "./pages/PendingAccountsPage";
 import { TimerPage } from "./pages/TimerPage";
@@ -71,6 +72,7 @@ export function App() {
             <Route path="/admin/rutinas/:id/editar" element={<StaffRoutineFormPage />} />
             <Route path="/admin/horarios" element={<SchedulesPage />} />
             <Route path="/admin/alumnos" element={<StudentsFollowPage />} />
+            <Route path="/admin/alumnos/:id" element={<StudentCalendarPage />} />
             <Route path="/admin/pendientes" element={<PendingAccountsPage />} />
             <Route path="/admin/progreso" element={<ProgressPage />} />
           </Route>
