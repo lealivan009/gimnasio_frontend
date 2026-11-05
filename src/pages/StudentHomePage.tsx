@@ -220,12 +220,11 @@ export function StudentHomePage() {
   const weekday = DAY_LABELS[weekdayIndex()];
   const closedToday =
     hours != null && hours.length > 0 && !hours.some((hour) => hour.dayOfWeek === weekdayIndex());
-  const presentLabel = closedToday && !attendance ? "Hoy no abre" :
-    attendance?.checkInTime && !attendance.checkOutTime
-      ? "Estás adentro"
-      : attendance?.checkInTime
-        ? "Salida marcada"
-        : "Todavía no la marcaste";
+  const presentLabel = closedToday && !attendance
+    ? "Hoy no abre"
+    : attendance?.checkInTime
+      ? "Presente"
+      : "Todavía no la marcaste";
 
   return (
     <div className="gym-home">

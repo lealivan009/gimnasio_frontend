@@ -69,18 +69,13 @@ export function StudentsFollowPage() {
     };
   }, []);
 
-  async function mark(studentId: string, action: "in" | "out") {
+  async function markPresent(studentId: string) {
     setBusyId(studentId);
     setError(null);
     setNotice(null);
     try {
-      if (action === "in") {
-        await api.staffCheckIn(studentId);
-        setNotice("Presente registrado");
-      } else {
-        await api.staffCheckOut(studentId);
-        setNotice("Salida registrada");
-      }
+      await api.staffCheckIn(studentId);
+      setNotice("Presente registrado");
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo actualizar la asistencia");
@@ -141,7 +136,6 @@ export function StudentsFollowPage() {
               </thead>
               <tbody>
                 {students.slice(page * pageSize, page * pageSize + pageSize).map((student) => {
-                  const isInside = inside.some((person) => person.studentId === student.id);
                   const presentToday =
                     student.lastCheckIn != null &&
                     attendanceDate(student.lastCheckIn) === attendanceDate(new Date().toISOString());
@@ -176,23 +170,14 @@ export function StudentsFollowPage() {
                     <td>{formatDateTime(student.lastCheckIn)}</td>
                     <td>{student.attendanceLast30Days}</td>
                     <td className="actions">
-                      {presentToday && !isInside ? (
+                      {presentToday ? (
                         <span className="pill on">Presente</span>
-                      ) : isInside ? (
-                        <button
-                          type="button"
-                          className="btn-ghost"
-                          disabled={busyId === student.id}
-                          onClick={() => mark(student.id, "out")}
-                        >
-                          Marcar salida
-                        </button>
                       ) : openNow ? (
                         <button
                           type="button"
                           className="btn-primary btn-inline"
                           disabled={busyId === student.id}
-                          onClick={() => mark(student.id, "in")}
+                          onClick={() => markPresent(student.id)}
                         >
                           Dar presente
                         </button>
