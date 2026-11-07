@@ -270,6 +270,7 @@ export interface ProgressPoint {
   volumeKg: number;
   sets: number;
   maxSeconds?: number | null;
+  maxReps?: number | null;
 }
 
 export interface PersonalRecord {

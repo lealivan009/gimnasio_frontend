@@ -2155,6 +2155,10 @@ textarea {
   font-weight: 600;
 }
 
+.record-chart .chart-plot + h3 {
+  margin-top: 18px;
+}
+
 .record-copy {
   min-width: 0;
 }

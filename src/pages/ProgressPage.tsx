@@ -226,19 +226,36 @@ function looseRecords(records: PersonalRecord[]) {
                           <div className="record-chart">
                             <h3>{record.measure === "TIEMPO" ? "Duración máxima" : "Peso máximo"}</h3>
                             {series?.exerciseId === record.exerciseId ? (
-                              <LineChart
-                                label={
-                                  record.measure === "TIEMPO"
-                                    ? `Duración máxima de ${record.exerciseName}`
-                                    : `Peso máximo de ${record.exerciseName}`
-                                }
-                                unit={record.measure === "TIEMPO" ? "s" : "kg"}
-                                points={series.points.map((point) => ({
-                                  label: formatDate(point.date),
-                                  value:
-                                    record.measure === "TIEMPO" ? Number(point.maxSeconds ?? 0) : Number(point.maxWeightKg),
-                                }))}
-                              />
+                              <>
+                                <LineChart
+                                  label={
+                                    record.measure === "TIEMPO"
+                                      ? `Duración máxima de ${record.exerciseName}`
+                                      : `Peso máximo de ${record.exerciseName}`
+                                  }
+                                  unit={record.measure === "TIEMPO" ? "s" : "kg"}
+                                  points={series.points.map((point) => ({
+                                    label: formatDate(point.date),
+                                    value:
+                                      record.measure === "TIEMPO"
+                                        ? Number(point.maxSeconds ?? 0)
+                                        : Number(point.maxWeightKg),
+                                  }))}
+                                />
+                                {record.measure === "TIEMPO" ? null : (
+                                  <>
+                                    <h3>Repeticiones con ese peso</h3>
+                                    <LineChart
+                                      label={`Repeticiones de ${record.exerciseName}`}
+                                      unit="reps"
+                                      points={series.points.map((point) => ({
+                                        label: formatDate(point.date),
+                                        value: Number(point.maxReps ?? 0),
+                                      }))}
+                                    />
+                                  </>
+                                )}
+                              </>
                             ) : (
                               <p className="lede">Cargando…</p>
                             )}
