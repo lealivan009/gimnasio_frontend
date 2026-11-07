@@ -2155,6 +2155,19 @@ textarea {
   font-weight: 600;
 }
 
+.record-charts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 28px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .record-charts {
+    grid-template-columns: 1fr;
+  }
+}
+
 .record-copy {
   min-width: 0;
 }
@@ -2635,52 +2648,6 @@ a.btn-ghost {
   min-width: 0;
 }
 
-.chart-plot.has-overlay {
-  grid-template-columns: auto minmax(0, 1fr) auto;
-}
-
-.chart-legend {
-  grid-column: 1 / -1;
-  grid-row: 1;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 14px;
-  margin-bottom: 8px;
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.chart-legend span {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.chart-swatch {
-  width: 16px;
-  height: 3px;
-  border-radius: 99px;
-  background: var(--accent);
-}
-
-.chart-swatch.is-overlay {
-  background: var(--text);
-}
-
-.chart-plot.has-overlay .chart-scale,
-.chart-plot.has-overlay .chart-canvas {
-  grid-row: 2;
-}
-
-.chart-plot.has-overlay .chart-scale.is-right {
-  grid-column: 3;
-  text-align: left;
-}
-
-.chart-plot.has-overlay .chart-dates {
-  grid-row: 3;
-}
-
 .chart-scale {
   display: grid;
   grid-row: 1;
@@ -2720,17 +2687,8 @@ a.btn-ghost {
   stroke-linecap: round;
 }
 
-.chart-line.is-overlay {
-  stroke: var(--text);
-  stroke-dasharray: 4 3;
-}
-
 .chart-dot {
   fill: currentColor;
-}
-
-.chart-dot.is-overlay {
-  fill: var(--text);
 }
 
 .chart-grid,
@@ -2757,20 +2715,6 @@ a.btn-ghost {
 
 .chart-value.is-end {
   transform: translate(-100%, calc(-100% - 8px));
-}
-
-.chart-value.is-overlay {
-  transform: translate(-50%, 8px);
-  color: var(--muted);
-  font-weight: 500;
-}
-
-.chart-value.is-overlay.is-start {
-  transform: translate(0, 8px);
-}
-
-.chart-value.is-overlay.is-end {
-  transform: translate(-100%, 8px);
 }
 
 .chart-dates {
