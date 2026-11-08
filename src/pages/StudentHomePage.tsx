@@ -24,6 +24,7 @@ import {
   type WorkoutLog,
 } from "../api/gym";
 import { ExerciseHowTo } from "../components/ExerciseHowTo";
+import { ConfirmDialog } from "../components/ConfirmDialog";
 import { MonthCalendar } from "../components/MonthCalendar";
 import { Toast } from "../components/Toast";
 import { weekdayIndex } from "../gym/hours";
@@ -214,6 +215,13 @@ export function StudentHomePage() {
       if (restSeconds > 0) {
         setRest({ name: exerciseName, left: restSeconds });
       }
+    });
+  }
+
+  async function onDeleteSet(log: WorkoutLog) {
+    await runAction(log.id, async () => {
+      await api.deleteWorkout(log.id);
+      setNotice("Serie borrada");
     });
   }
 
@@ -433,6 +441,7 @@ export function StudentHomePage() {
               setChoosingDay(false);
             }}
             onLog={onLog}
+            onDeleteSet={onDeleteSet}
             logDate={logDate}
             present={presentDates.includes(logDate)}
           />
@@ -468,6 +477,7 @@ function TrainingDay({
   onStart,
   onClose,
   onLog,
+  onDeleteSet,
   logDate,
   present,
 }: {
@@ -492,9 +502,11 @@ function TrainingDay({
     timed: boolean,
     durationSeconds?: number
   ) => Promise<void>;
+  onDeleteSet: (log: WorkoutLog) => Promise<void>;
   logDate: string;
   present: boolean;
 }) {
+  const [pendingSet, setPendingSet] = useState<WorkoutLog | null>(null);
   const days = routineDays(routineExercises);
   const openDay = days.find((day) => day.dayNumber === loggingDay) ?? null;
   const sessions = new Map<number, { label: string | null; logs: WorkoutLog[] }>();
@@ -513,6 +525,29 @@ function TrainingDay({
 
   return (
     <>
+      <ConfirmDialog
+        open={pendingSet != null}
+        title="Borrar serie"
+        description={
+          pendingSet
+            ? `Se va a borrar la serie ${pendingSet.setNumber}. Si el dato estaba mal, la volvés a cargar.`
+            : ""
+        }
+        confirmLabel="Borrar"
+        danger
+        busy={busyId === pendingSet?.id}
+        onCancel={() => {
+          if (busyId !== pendingSet?.id) {
+            setPendingSet(null);
+          }
+        }}
+        onConfirm={() => {
+          if (!pendingSet) {
+            return;
+          }
+          void onDeleteSet(pendingSet).then(() => setPendingSet(null));
+        }}
+      />
       {canLoad || selectedSessions.length > 0 ? (
         <div className="load-day">
           <p>{selectedDate ? formatDate(selectedDate) : ""}</p>
@@ -572,6 +607,15 @@ function TrainingDay({
                             {timed ? formatDuration(log.durationSeconds ?? 0) : `${log.repsCompleted}×${formatKg(log.weightKg)}`}
                             {log.rpe ? ` · ${log.rpe}` : ""}
                           </span>
+                          <button
+                            type="button"
+                            className="set-remove"
+                            aria-label={`Borrar serie ${log.setNumber}`}
+                            disabled={busyId === log.id}
+                            onClick={() => setPendingSet(log)}
+                          >
+                            ×
+                          </button>
                         </li>
                       ))}
                     </ul>

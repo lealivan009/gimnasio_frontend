@@ -1903,7 +1903,7 @@ textarea {
 
 .set-chips li {
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
   gap: 6px;
   margin: 0;
   padding: 3px 8px;
@@ -1917,6 +1917,25 @@ textarea {
 .set-chips li strong {
   color: var(--text);
   font-weight: 600;
+}
+
+.set-remove {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.set-remove:hover {
+  color: var(--danger);
+}
+
+.set-remove:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 .tracker-card .set-form {

@@ -407,6 +407,10 @@ export class ApiClient {
     return this.request<WorkoutLog>("/api/registros-entrenamiento", { method: "POST", body: input });
   }
 
+  deleteWorkout(id: string) {
+    return this.request(`/api/registros-entrenamiento/${encodeURIComponent(id)}`, { method: "DELETE" });
+  }
+
   listWeights(studentId?: string) {
     const query = studentId ? `?studentId=${encodeURIComponent(studentId)}` : "";
     return this.request<WeightLog[]>(`/api/peso${query}`);
