@@ -1,4 +1,5 @@
 import { useEffect, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -40,7 +41,7 @@ export function ConfirmDialog({
     return null;
   }
 
-  return (
+  return createPortal(
     <div className="modal-root" role="presentation">
       <button
         type="button"
@@ -79,6 +80,7 @@ export function ConfirmDialog({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
