@@ -26,6 +26,7 @@ import {
 import { ExerciseHowTo } from "../components/ExerciseHowTo";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { MonthCalendar } from "../components/MonthCalendar";
+import { SkeletonCalendar } from "../components/Skeleton";
 import { Toast } from "../components/Toast";
 import { weekdayIndex } from "../gym/hours";
 import { beep, unlockSound } from "../gym/sound";
@@ -236,7 +237,7 @@ export function StudentHomePage() {
 
   return (
     <div className="gym-home">
-      <section className="session-card home-brief">
+      <section className="session-card home-brief" aria-busy={loading}>
         <div className="home-brief-row">
           <div>
             <p className="eyebrow">{weekday}</p>
@@ -244,12 +245,14 @@ export function StudentHomePage() {
           </div>
           <div className="home-occupancy">
             <p className="eyebrow">Asistencia</p>
-            <p>{presentLabel}</p>
+            {loading ? <span className="skeleton skeleton-line short" /> : <p>{presentLabel}</p>}
           </div>
         </div>
         {error ? <p className="alert">{error}</p> : null}
         <Toast message={notice} onClose={() => setNotice(null)} />
-        {attendance || closedToday ? null : (
+        {loading ? (
+          <span className="skeleton skeleton-button" />
+        ) : attendance || closedToday ? null : (
           <div className="home-attendance">
             <div className="form-actions">
               <button
@@ -265,8 +268,14 @@ export function StudentHomePage() {
         )}
       </section>
 
-      {loading ? <p className="lede">Cargando…</p> : null}
-
+      {loading ? (
+        <section className="session-card" aria-busy="true" aria-label="Cargando el día">
+          <span className="skeleton skeleton-line short" />
+          <span className="skeleton skeleton-line" />
+          <SkeletonCalendar />
+        </section>
+      ) : (
+        <>
       {mode !== "FREE_ACCESS" ? (
         <section className="session-card">
           <h2>Turnos de hoy</h2>
@@ -447,6 +456,8 @@ export function StudentHomePage() {
           />
         ) : null}
       </section>
+        </>
+      )}
       {rest ? (
         <div className="rest-timer" role="status">
           <strong>

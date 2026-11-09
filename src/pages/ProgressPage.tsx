@@ -18,6 +18,7 @@ import { isStaff } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import { LineChart } from "../components/LineChart";
 import { MonthCalendar } from "../components/MonthCalendar";
+import { SkeletonLines } from "../components/Skeleton";
 import { Toast } from "../components/Toast";
 
 export function ProgressPage() {
@@ -188,7 +189,6 @@ function looseRecords(records: PersonalRecord[]) {
         </section>
       ) : null}
       {error ? <p className="alert">{error}</p> : null}
-      {loading && !summary ? <p className="lede">Cargando…</p> : null}
 
       <section className="session-card">
         <h2>Marcas personales</h2>
@@ -264,7 +264,7 @@ function looseRecords(records: PersonalRecord[]) {
                                 </div>
                               )
                             ) : (
-                              <p className="lede">Cargando…</p>
+                              <span className="skeleton skeleton-chart" />
                             )}
                           </div>
                         ) : null}
@@ -274,6 +274,8 @@ function looseRecords(records: PersonalRecord[]) {
               </ul>
             </section>
           ))
+        ) : loading && !summary ? (
+          <SkeletonLines count={4} />
         ) : (
           <p className="lede">Todavía no hay marcas.</p>
         )}

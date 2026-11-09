@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { api } from "../api/client";
 import type { Exercise } from "../api/gym";
+import { SkeletonLines } from "./Skeleton";
 
 export function ExerciseHowTo({
   exerciseId,
@@ -78,7 +79,7 @@ export function ExerciseHowTo({
               <div className="modal-card" role="dialog" aria-modal="true" aria-labelledby="exercise-how-title">
                 <p className="eyebrow">Cómo hacerlo</p>
                 <h2 id="exercise-how-title">{name}</h2>
-                {loading ? <p className="lede">Cargando…</p> : null}
+                {loading ? <SkeletonLines count={3} /> : null}
                 {error ? <p className="alert">{error}</p> : null}
                 {!loading && !error ? (
                   <div className="exercise-how">

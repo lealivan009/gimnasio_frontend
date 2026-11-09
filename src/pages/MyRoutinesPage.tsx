@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 import { assignmentState, formatDate, type Assignment, type Routine } from "../api/gym";
 import { RoutineOutline } from "../components/RoutineBuilder";
+import { SkeletonLines } from "../components/Skeleton";
 import { Toast } from "../components/Toast";
 
 export function MyRoutinesPage() {
@@ -59,7 +60,7 @@ export function MyRoutinesPage() {
         {error ? <p className="alert">{error}</p> : null}
         <Toast message={notice} onClose={() => setNotice(null)} />
         {loading ? (
-          <p className="lede">Cargando…</p>
+          <SkeletonLines count={3} />
         ) : assignments.length === 0 ? (
           <p className="lede">Todavía no tenés una rutina asignada.</p>
         ) : (
