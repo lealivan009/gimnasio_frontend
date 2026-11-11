@@ -209,7 +209,6 @@ function looseRecords(records: PersonalRecord[]) {
                         >
                           <div className="record-copy">
                             <strong>{record.exerciseName}</strong>
-                            <span>{formatDate(record.achievedAt.slice(0, 10))}</span>
                           </div>
                           <span className="record-kg">
                             {record.measure === "TIEMPO" ? (
