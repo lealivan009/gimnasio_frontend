@@ -473,6 +473,21 @@ export function StudentHomePage() {
   );
 }
 
+function exercisesByCategory(exercises: RoutineExercise[]) {
+  const order: RoutineExercise["muscleGroup"][] = [];
+  const grouped = new Map<RoutineExercise["muscleGroup"], RoutineExercise[]>();
+  for (const exercise of exercises) {
+    const current = grouped.get(exercise.muscleGroup);
+    if (current) {
+      current.push(exercise);
+    } else {
+      order.push(exercise.muscleGroup);
+      grouped.set(exercise.muscleGroup, [exercise]);
+    }
+  }
+  return order.map((muscle) => ({ muscle, exercises: grouped.get(muscle) ?? [] }));
+}
+
 function TrainingDay({
   routineExercises,
   logs,
@@ -587,163 +602,168 @@ function TrainingDay({
           <p className="hint left">
             Esfuerzo es opcional, del 1 al 10: 1 es muy fácil y 10 es que no podrías hacer otra repetición.
           </p>
-          <div className="stack">
-            {openDay.exercises.map((exercise) => {
-              const timed = exercise.measure === "TIEMPO";
-              const done = logs
-                .filter((log) => log.exerciseId === exercise.exerciseId && (log.dayNumber ?? 1) === openDay.dayNumber)
-                .slice()
-                .sort((a, b) => a.setNumber - b.setNumber);
-              const draft = drafts[exercise.exerciseId] ?? { reps: String(exercise.targetReps), weight: "", rpe: "" };
-              const totalSeconds = Number(draft.reps) || 0;
-              return (
-                <article className="tracker-card" key={exercise.id}>
-                  <div>
-                    <div className="exercise-name">
-                      <strong>{exercise.exerciseName}</strong>
-                      <ExerciseHowTo exerciseId={exercise.exerciseId} name={exercise.exerciseName} notes={exercise.notes} />
-                    </div>
-                    <p className="cell-note">
-                      {MUSCLE_LABELS[exercise.muscleGroup]} · objetivo {exercise.targetSets}×
-                      {exercise.measure === "TIEMPO" ? formatDuration(exercise.targetReps) : exercise.targetReps}
-                      {exercise.notes ? ` · ${exercise.notes}` : ""}
-                    </p>
-                  </div>
-                  {done.length > 0 ? (
-                    <ul className="set-chips">
-                      {done.map((log) => (
-                        <li key={log.id}>
-                          <strong>{log.setNumber}</strong>
-                          <span>
-                            {timed ? formatDuration(log.durationSeconds ?? 0) : `${log.repsCompleted}×${formatKg(log.weightKg)}`}
-                            {log.rpe ? ` · ${log.rpe}` : ""}
-                          </span>
-                          <button
-                            type="button"
-                            className="set-remove"
-                            aria-label={`Borrar serie ${log.setNumber}`}
-                            disabled={busyId === log.id}
-                            onClick={() => setPendingSet(log)}
-                          >
-                            ×
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : null}
-                  {present ? (
-                  <form
-                    className="set-form"
-                    noValidate
-                    onSubmit={(event) =>
-                      onLog(event, exercise.exerciseId, exercise.targetRestSeconds, exercise.exerciseName, timed, totalSeconds)
-                    }
-                  >
-                    {timed ? (
-                      <>
-                        <label>
-                          <span>Min</span>
-                          <input
-                            inputMode="numeric"
-                            value={String(Math.floor(totalSeconds / 60))}
-                            onChange={(event) => {
-                              const minutes = clampTime(event.target.value, 120);
-                              const seconds = totalSeconds % 60;
-                              onDrafts({
-                                ...drafts,
-                                [exercise.exerciseId]: { ...draft, reps: String(minutes * 60 + seconds), weight: "0" },
-                              });
-                            }}
-                          />
-                        </label>
-                        <label>
-                          <span>Seg</span>
-                          <input
-                            inputMode="numeric"
-                            value={String(totalSeconds % 60)}
-                            onChange={(event) => {
-                              const seconds = clampTime(event.target.value, 59);
-                              const minutes = Math.floor(totalSeconds / 60);
-                              onDrafts({
-                                ...drafts,
-                                [exercise.exerciseId]: { ...draft, reps: String(minutes * 60 + seconds), weight: "0" },
-                              });
-                            }}
-                          />
-                        </label>
-                      </>
-                    ) : (
-                      <>
-                        <label>
-                          <span>Reps</span>
-                          <input
-                            inputMode="numeric"
-                            type="number"
-                            min={0}
-                            value={draft.reps}
-                            onChange={(event) =>
-                              onDrafts({ ...drafts, [exercise.exerciseId]: { ...draft, reps: event.target.value } })
-                            }
-                            required
-                          />
-                        </label>
-                        <label>
-                          <span>Kg</span>
-                          <input
-                            inputMode="decimal"
-                            type="number"
-                            min={0}
-                            step="0.5"
-                            value={draft.weight}
-                            onChange={(event) =>
-                              onDrafts({ ...drafts, [exercise.exerciseId]: { ...draft, weight: event.target.value } })
-                            }
-                            required
-                          />
-                        </label>
-                      </>
-                    )}
-                    <label>
-                      <span>Esf.</span>
-                      <select
-                        value={draft.rpe}
-                        onChange={(event) =>
-                          onDrafts({ ...drafts, [exercise.exerciseId]: { ...draft, rpe: event.target.value } })
+          <div className="tracker-groups">
+            {exercisesByCategory(openDay.exercises).map((group) => (
+              <section className="tracker-group" key={group.muscle}>
+                <p className="eyebrow">{MUSCLE_LABELS[group.muscle]}</p>
+                {group.exercises.map((exercise) => {
+                  const timed = exercise.measure === "TIEMPO";
+                  const done = logs
+                    .filter((log) => log.exerciseId === exercise.exerciseId && (log.dayNumber ?? 1) === openDay.dayNumber)
+                    .slice()
+                    .sort((a, b) => a.setNumber - b.setNumber);
+                  const draft = drafts[exercise.exerciseId] ?? { reps: String(exercise.targetReps), weight: "", rpe: "" };
+                  const totalSeconds = Number(draft.reps) || 0;
+                  return (
+                    <article className="tracker-card" key={exercise.id}>
+                      <div>
+                        <div className="exercise-name">
+                          <strong>{exercise.exerciseName}</strong>
+                          <ExerciseHowTo exerciseId={exercise.exerciseId} name={exercise.exerciseName} notes={exercise.notes} />
+                        </div>
+                        <p className="cell-note">
+                          Objetivo {exercise.targetSets}×
+                          {exercise.measure === "TIEMPO" ? formatDuration(exercise.targetReps) : exercise.targetReps}
+                          {exercise.notes ? ` · ${exercise.notes}` : ""}
+                        </p>
+                      </div>
+                      {done.length > 0 ? (
+                        <ul className="set-chips">
+                          {done.map((log) => (
+                            <li key={log.id}>
+                              <strong>{log.setNumber}</strong>
+                              <span>
+                                {timed ? formatDuration(log.durationSeconds ?? 0) : `${log.repsCompleted}×${formatKg(log.weightKg)}`}
+                                {log.rpe ? ` · ${log.rpe}` : ""}
+                              </span>
+                              <button
+                                type="button"
+                                className="set-remove"
+                                aria-label={`Borrar serie ${log.setNumber}`}
+                                disabled={busyId === log.id}
+                                onClick={() => setPendingSet(log)}
+                              >
+                                ×
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                      {present ? (
+                      <form
+                        className="set-form"
+                        noValidate
+                        onSubmit={(event) =>
+                          onLog(event, exercise.exerciseId, exercise.targetRestSeconds, exercise.exerciseName, timed, totalSeconds)
                         }
                       >
-                        <option value="">—</option>
-                        {Array.from({ length: 10 }, (_, index) => index + 1).map((value) => (
-                          <option key={value} value={value}>
-                            {value}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    <button
-                      className="btn-primary"
-                      type="button"
-                      disabled={busyId === exercise.exerciseId}
-                      onClick={(event) => {
-                        if (!timed && !event.currentTarget.form?.reportValidity()) {
-                          return;
-                        }
-                        void onLog(
-                          event,
-                          exercise.exerciseId,
-                          exercise.targetRestSeconds,
-                          exercise.exerciseName,
-                          timed,
-                          totalSeconds
-                        );
-                      }}
-                    >
-                      Serie {done.length + 1}
-                    </button>
-                  </form>
-                  ) : null}
-                </article>
-              );
-            })}
+                        {timed ? (
+                          <>
+                            <label>
+                              <span>Min</span>
+                              <input
+                                inputMode="numeric"
+                                value={String(Math.floor(totalSeconds / 60))}
+                                onChange={(event) => {
+                                  const minutes = clampTime(event.target.value, 120);
+                                  const seconds = totalSeconds % 60;
+                                  onDrafts({
+                                    ...drafts,
+                                    [exercise.exerciseId]: { ...draft, reps: String(minutes * 60 + seconds), weight: "0" },
+                                  });
+                                }}
+                              />
+                            </label>
+                            <label>
+                              <span>Seg</span>
+                              <input
+                                inputMode="numeric"
+                                value={String(totalSeconds % 60)}
+                                onChange={(event) => {
+                                  const seconds = clampTime(event.target.value, 59);
+                                  const minutes = Math.floor(totalSeconds / 60);
+                                  onDrafts({
+                                    ...drafts,
+                                    [exercise.exerciseId]: { ...draft, reps: String(minutes * 60 + seconds), weight: "0" },
+                                  });
+                                }}
+                              />
+                            </label>
+                          </>
+                        ) : (
+                          <>
+                            <label>
+                              <span>Reps</span>
+                              <input
+                                inputMode="numeric"
+                                type="number"
+                                min={0}
+                                value={draft.reps}
+                                onChange={(event) =>
+                                  onDrafts({ ...drafts, [exercise.exerciseId]: { ...draft, reps: event.target.value } })
+                                }
+                                required
+                              />
+                            </label>
+                            <label>
+                              <span>Kg</span>
+                              <input
+                                inputMode="decimal"
+                                type="number"
+                                min={0}
+                                step="0.5"
+                                value={draft.weight}
+                                onChange={(event) =>
+                                  onDrafts({ ...drafts, [exercise.exerciseId]: { ...draft, weight: event.target.value } })
+                                }
+                                required
+                              />
+                            </label>
+                          </>
+                        )}
+                        <label>
+                          <span>Esf.</span>
+                          <select
+                            value={draft.rpe}
+                            onChange={(event) =>
+                              onDrafts({ ...drafts, [exercise.exerciseId]: { ...draft, rpe: event.target.value } })
+                            }
+                          >
+                            <option value="">—</option>
+                            {Array.from({ length: 10 }, (_, index) => index + 1).map((value) => (
+                              <option key={value} value={value}>
+                                {value}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        <button
+                          className="btn-primary"
+                          type="button"
+                          disabled={busyId === exercise.exerciseId}
+                          onClick={(event) => {
+                            if (!timed && !event.currentTarget.form?.reportValidity()) {
+                              return;
+                            }
+                            void onLog(
+                              event,
+                              exercise.exerciseId,
+                              exercise.targetRestSeconds,
+                              exercise.exerciseName,
+                              timed,
+                              totalSeconds
+                            );
+                          }}
+                        >
+                          Serie {done.length + 1}
+                        </button>
+                      </form>
+                      ) : null}
+                    </article>
+                  );
+                })}
+              </section>
+            ))}
           </div>
         </>
       ) : choosingDay ? null : (
