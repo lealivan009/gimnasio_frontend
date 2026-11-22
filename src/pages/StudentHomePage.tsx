@@ -30,7 +30,7 @@ import { MonthCalendar } from "../components/MonthCalendar";
 import { SkeletonCalendar } from "../components/Skeleton";
 import { Toast } from "../components/Toast";
 import { weekdayIndex } from "../gym/hours";
-import { beep, restAlarmFinished, restAlarmIsPlaying, startRestAlarm, stopRestAlarm, unlockSound } from "../gym/sound";
+import { beep, unlockSound } from "../gym/sound";
 
 function clampTime(raw: string, max: number) {
   const digits = raw.replace(/\D/g, "");
@@ -99,7 +99,6 @@ export function StudentHomePage() {
     void current?.release().catch(() => undefined);
   }, []);
   const skipRest = useCallback(() => {
-    stopRestAlarm();
     releaseScreen();
     setRest(null);
   }, [releaseScreen]);
@@ -221,7 +220,6 @@ export function StudentHomePage() {
     }
     const done = logs.filter((log) => log.exerciseId === exerciseId && (log.dayNumber ?? 1) === loggingDay).length;
     const day = routineDays(active?.routine?.exercises ?? []).find((item) => item.dayNumber === loggingDay);
-    const alarmStartedAt = restSeconds > 0 ? startRestAlarm(restSeconds, exerciseName) : null;
     await runAction(exerciseId, async () => {
       await api.createWorkout({
         exerciseId,
@@ -238,13 +236,9 @@ export function StudentHomePage() {
       setNotice("Serie registrada");
       if (restSeconds > 0) {
         started = true;
-        const origin = alarmStartedAt ?? Date.now();
-        setRest({ name: exerciseName, endsAt: origin + restSeconds * 1000 });
+        setRest({ name: exerciseName, endsAt: Date.now() + restSeconds * 1000 });
       }
     });
-    if (alarmStartedAt != null && !started) {
-      stopRestAlarm();
-    }
     dropScreen();
   }
 
@@ -521,17 +515,7 @@ function RestModal({
     function tick() {
       const remaining = secondsLeft(endsAt);
       setLeft((current) => (current === remaining ? current : remaining));
-      if (remaining === 0 && !finished.current && document.visibilityState === "visible") {
-        if (restAlarmIsPlaying()) {
-          return;
-        }
-        if (restAlarmFinished()) {
-          finished.current = true;
-          return;
-        }
-        if (sounding.current) {
-          return;
-        }
+      if (remaining === 0 && !finished.current && !sounding.current && document.visibilityState === "visible") {
         sounding.current = true;
         void beep().then((played) => {
           sounding.current = false;

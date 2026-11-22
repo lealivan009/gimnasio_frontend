@@ -19,12 +19,6 @@ const ALARM_PULSES = [
   { at: 0.6, frequency: 1320, duration: 0.36 },
 ];
 const ALARM_LENGTH = 1.05;
-const TRACK_RATE = 16000;
-const MAX_REST_SECONDS = 15 * 60;
-
-let restTrack: HTMLAudioElement | null = null;
-let restUrl: string | null = null;
-let restState: "idle" | "playing" | "ended" = "idle";
 
 function encodeWav(samples: Float32Array, sampleRate: number) {
   const bytes = samples.length * 2;
@@ -69,99 +63,6 @@ function alarmWav() {
   const samples = new Float32Array(length);
   writeAlarm(samples, SAMPLE_RATE, 0);
   return encodeWav(samples, SAMPLE_RATE);
-}
-
-function clearMediaSession() {
-  if (!("mediaSession" in navigator)) {
-    return;
-  }
-  navigator.mediaSession.metadata = null;
-  navigator.mediaSession.playbackState = "none";
-}
-
-function showMediaSession(title: string, duration: number) {
-  if (!("mediaSession" in navigator)) {
-    return;
-  }
-  try {
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: "Descanso",
-      artist: title,
-    });
-    navigator.mediaSession.playbackState = "playing";
-    navigator.mediaSession.setPositionState?.({
-      duration,
-      playbackRate: 1,
-      position: 0,
-    });
-  } catch {
-    // El aviso de la pantalla bloqueada es opcional. El audio sigue igual.
-  }
-}
-
-export function restAlarmIsPlaying() {
-  return restState === "playing" && restTrack != null && !restTrack.paused && !restTrack.ended;
-}
-
-export function restAlarmFinished() {
-  return restState === "ended";
-}
-
-export function stopRestAlarm() {
-  restState = "idle";
-  if (restTrack) {
-    restTrack.onended = null;
-    restTrack.pause();
-    restTrack.removeAttribute("src");
-    restTrack.load();
-  }
-  if (restUrl) {
-    URL.revokeObjectURL(restUrl);
-  }
-  restTrack = null;
-  restUrl = null;
-  clearMediaSession();
-}
-
-export function startRestAlarm(seconds: number, title: string) {
-  const whole = Math.round(seconds);
-  if (whole <= 0 || whole > MAX_REST_SECONDS) {
-    return null;
-  }
-  stopRestAlarm();
-  const length = Math.floor((whole + ALARM_LENGTH) * TRACK_RATE);
-  const samples = new Float32Array(length);
-  const period = new Float32Array(TRACK_RATE / 40);
-  for (let index = 0; index < period.length; index += 1) {
-    period[index] = Math.sin((2 * Math.PI * index) / period.length) * 0.015;
-  }
-  const waitSamples = whole * TRACK_RATE;
-  for (let offset = 0; offset + period.length <= waitSamples; offset += period.length) {
-    samples.set(period, offset);
-  }
-  writeAlarm(samples, TRACK_RATE, whole);
-  const url = URL.createObjectURL(encodeWav(samples, TRACK_RATE));
-  const audio = new Audio(url);
-  audio.preload = "auto";
-  audio.setAttribute("playsinline", "true");
-  audio.volume = 1;
-  restTrack = audio;
-  restUrl = url;
-  restState = "playing";
-  audio.onended = () => {
-    if (restTrack !== audio) {
-      return;
-    }
-    restState = "ended";
-    clearMediaSession();
-  };
-  void audio.play().catch(() => {
-    if (restTrack === audio) {
-      restState = "idle";
-    }
-  });
-  showMediaSession(title, whole + ALARM_LENGTH);
-  return Date.now();
 }
 
 function alarmAudio() {
