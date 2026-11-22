@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { api } from "../api/client";
 import {
   DAY_LABELS,
@@ -75,8 +76,34 @@ export function StudentHomePage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [rest, setRest] = useState<{ name: string; left: number } | null>(null);
-  const restFinished = useRef(false);
+  const [rest, setRest] = useState<{ name: string; endsAt: number } | null>(null);
+  const screenLock = useRef<WakeLockSentinel | null>(null);
+  const holdScreen = useCallback(async () => {
+    if (!("wakeLock" in navigator) || document.visibilityState !== "visible") {
+      return;
+    }
+    try {
+      const next = await navigator.wakeLock.request("screen");
+      const previous = screenLock.current;
+      screenLock.current = next;
+      if (previous && previous !== next) {
+        void previous.release().catch(() => undefined);
+      }
+    } catch {
+      // Si el celular no deja mantener la pantalla, el descanso igual sigue por la hora.
+    }
+  }, []);
+  const releaseScreen = useCallback(() => {
+    const current = screenLock.current;
+    screenLock.current = null;
+    void current?.release().catch(() => undefined);
+  }, []);
+  const skipRest = useCallback(() => {
+    releaseScreen();
+    setRest(null);
+  }, [releaseScreen]);
+
+  useEffect(() => releaseScreen, [releaseScreen]);
   const [drafts, setDrafts] = useState<Record<string, { reps: string; weight: string; rpe: string }>>({});
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
@@ -139,23 +166,6 @@ export function StudentHomePage() {
     };
   }, [today, year, month, logDate]);
 
-  useEffect(() => {
-    if (!rest) {
-      restFinished.current = false;
-      return;
-    }
-    if (rest.left <= 0) {
-      if (!restFinished.current) {
-        restFinished.current = true;
-        beep();
-      }
-      return;
-    }
-    restFinished.current = false;
-    const handle = window.setTimeout(() => setRest({ ...rest, left: rest.left - 1 }), 1000);
-    return () => window.clearTimeout(handle);
-  }, [rest]);
-
   async function runAction(id: string, action: () => Promise<void>) {
     setBusyId(id);
     setError(null);
@@ -180,8 +190,17 @@ export function StudentHomePage() {
   ) {
     event.preventDefault();
     unlockSound();
+    void holdScreen();
+    const hadRest = rest != null;
+    let started = false;
+    function dropScreen() {
+      if (!started && !hadRest) {
+        releaseScreen();
+      }
+    }
     if (logDate > today) {
       setError("No podés cargar un día que todavía no llegó.");
+      dropScreen();
       return;
     }
     if (!presentDates.includes(logDate)) {
@@ -190,11 +209,13 @@ export function StudentHomePage() {
           ? "Marcá el presente de hoy para anotar las series."
           : "Marcá el presente de ese día en Progreso para anotar las series."
       );
+      dropScreen();
       return;
     }
     const draft = drafts[exerciseId] ?? { reps: "", weight: "", rpe: "" };
     if (timed && durationSeconds < 1) {
       setError("Indicá cuánto tiempo hiciste.");
+      dropScreen();
       return;
     }
     const done = logs.filter((log) => log.exerciseId === exerciseId && (log.dayNumber ?? 1) === loggingDay).length;
@@ -214,9 +235,11 @@ export function StudentHomePage() {
       });
       setNotice("Serie registrada");
       if (restSeconds > 0) {
-        setRest({ name: exerciseName, left: restSeconds });
+        started = true;
+        setRest({ name: exerciseName, endsAt: Date.now() + restSeconds * 1000 });
       }
     });
+    dropScreen();
   }
 
   async function onDeleteSet(log: WorkoutLog) {
@@ -459,17 +482,97 @@ export function StudentHomePage() {
         </>
       )}
       {rest ? (
-        <div className="rest-timer" role="status">
-          <strong>
-            {Math.floor(rest.left / 60)}:{String(rest.left % 60).padStart(2, "0")}
-          </strong>
-          <p>Descanso · {rest.name}</p>
-          <button type="button" className="btn-ghost" onClick={() => setRest(null)}>
-            Omitir
-          </button>
-        </div>
+        <RestModal key={rest.endsAt} name={rest.name} endsAt={rest.endsAt} onSkip={skipRest} onHold={holdScreen} />
       ) : null}
     </div>
+  );
+}
+
+function secondsLeft(endsAt: number, now = Date.now()) {
+  return Math.max(0, Math.ceil((endsAt - now) / 1000));
+}
+
+function formatClock(totalSeconds: number) {
+  return `${Math.floor(totalSeconds / 60)}:${String(totalSeconds % 60).padStart(2, "0")}`;
+}
+
+function RestModal({
+  name,
+  endsAt,
+  onSkip,
+  onHold,
+}: {
+  name: string;
+  endsAt: number;
+  onSkip: () => void;
+  onHold: () => void;
+}) {
+  const [left, setLeft] = useState(() => secondsLeft(endsAt));
+  const finished = useRef(false);
+
+  useEffect(() => {
+    function tick() {
+      const remaining = secondsLeft(endsAt);
+      setLeft((current) => (current === remaining ? current : remaining));
+      if (remaining === 0 && !finished.current && document.visibilityState === "visible") {
+        finished.current = true;
+        void beep();
+      }
+    }
+
+    function onVisible() {
+      if (document.visibilityState === "visible") {
+        tick();
+        onHold();
+      }
+    }
+
+    tick();
+    onHold();
+    const handle = window.setInterval(tick, 250);
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("pageshow", onVisible);
+    return () => {
+      window.clearInterval(handle);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("pageshow", onVisible);
+    };
+  }, [endsAt, onHold]);
+
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        onSkip();
+      }
+    }
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [onSkip]);
+
+  const done = left === 0;
+
+  return createPortal(
+    <div className="rest-modal">
+      <div className="rest-modal-backdrop" />
+      <div className="rest-modal-card" role="dialog" aria-modal="true" aria-labelledby="rest-title">
+        <p className="eyebrow" id="rest-title">
+          {done ? "Listo" : "Descanso"}
+        </p>
+        <p className={done ? "rest-modal-time done" : "rest-modal-time"} aria-live="polite">
+          {formatClock(left)}
+        </p>
+        <p className="rest-modal-name">{name}</p>
+        <button type="button" className="btn-ghost rest-modal-skip" onClick={onSkip}>
+          Omitir
+        </button>
+      </div>
+    </div>,
+    document.body
   );
 }
 

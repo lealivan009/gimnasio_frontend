@@ -19,13 +19,17 @@ export function unlockSound() {
   }
 }
 
-export function beep() {
+export async function beep() {
   const context = audioContext();
   if (!context) {
     return;
   }
   if (context.state === "suspended") {
-    void context.resume();
+    try {
+      await context.resume();
+    } catch {
+      return;
+    }
   }
   const oscillator = context.createOscillator();
   const gain = context.createGain();
