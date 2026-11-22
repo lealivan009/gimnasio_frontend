@@ -141,8 +141,8 @@ export function HolidaysPage() {
       {loading ? <p className="lede">Cargando…</p> : null}
       {!loading && rows.length === 0 ? <p className="lede">Todavía no hay días bloqueados.</p> : null}
       {rows.length > 0 ? (
-        <div className="table-wrap">
-          <table>
+        <div className="table-wrap closure-table-wrap">
+          <table className="users-table closure-table">
             <thead>
               <tr>
                 <th>Fecha</th>

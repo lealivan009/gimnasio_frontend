@@ -1487,6 +1487,41 @@ a.btn-ghost {
   margin-left: 12px;
 }
 
+.closure-table-wrap {
+  margin-top: 22px;
+}
+
+.closure-table {
+  table-layout: auto;
+}
+
+.closure-table th:nth-child(1),
+.closure-table td:nth-child(1) {
+  width: 18%;
+  white-space: nowrap;
+  padding-right: 28px;
+}
+
+.closure-table th:nth-child(2),
+.closure-table td:nth-child(2) {
+  width: 42%;
+  padding-right: 32px;
+}
+
+.closure-table th:nth-child(3),
+.closure-table td:nth-child(3) {
+  width: 24%;
+  white-space: nowrap;
+  padding-right: 24px;
+}
+
+.closure-table th:last-child,
+.closure-table td.actions {
+  width: 16%;
+  padding-left: 16px;
+  text-align: right;
+}
+
 .pill {
   display: inline-block;
   padding: 3px 8px;

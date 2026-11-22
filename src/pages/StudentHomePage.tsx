@@ -419,15 +419,17 @@ export function StudentHomePage() {
           }}
           maxDate={today}
         />
-        <p className="hint left">
-          {selectedClosure
-            ? `Este día está bloqueado: ${selectedClosure}`
-            : selectedDate && selectedDate > today
+        {selectedClosure ? (
+          <p className="alert">Este día está bloqueado: {selectedClosure}</p>
+        ) : (
+          <p className="hint left">
+            {selectedDate && selectedDate > today
               ? "Ese día todavía no llegó."
               : selectedDate && selectedDate < oldestLogDate
                 ? "Ese día queda afuera de los 7 días. Podés verlo, pero no cargarlo."
                 : "Tocá un día para marcarlo. El presente y el entrenamiento se pueden cargar hasta 7 días hacia atrás."}
-        </p>
+          </p>
+        )}
         {selectedClosure ? null : logDate < today && logDate >= oldestLogDate && !presentDates.includes(logDate) ? (
           dayClosed(logDate, hours) ? (
             <p className="lede">Ese día el gimnasio está cerrado.</p>
@@ -702,7 +704,6 @@ function TrainingDay({
           void onDeleteSet(pendingSet).then(() => setPendingSet(null));
         }}
       />
-      {blockedReason ? <p className="alert">Este día está bloqueado: {blockedReason}</p> : null}
       {canLoad || selectedSessions.length > 0 ? (
         <div className="load-day">
           <p>{selectedDate ? formatDate(selectedDate) : ""}</p>
