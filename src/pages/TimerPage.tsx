@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { beep } from "../gym/sound";
+import { beep, unlockSound } from "../gym/sound";
 
 type Mode = "stopwatch" | "countdown";
 
@@ -97,8 +97,7 @@ export function TimerPage() {
     setElapsed(countdownMs);
     setRunning(false);
     setFinished(true);
-    beep();
-    navigator.vibrate?.([200, 100, 200, 100, 320]);
+    void beep();
   }, [elapsed, running, mode, countdownMs]);
 
   function switchMode(next: Mode) {
@@ -122,6 +121,7 @@ export function TimerPage() {
     }
     announced.current = false;
     setFinished(false);
+    unlockSound();
     startedAt.current = Date.now();
     setRunning(true);
   }

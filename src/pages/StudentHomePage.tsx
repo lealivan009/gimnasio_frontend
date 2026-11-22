@@ -509,14 +509,20 @@ function RestModal({
 }) {
   const [left, setLeft] = useState(() => secondsLeft(endsAt));
   const finished = useRef(false);
+  const sounding = useRef(false);
 
   useEffect(() => {
     function tick() {
       const remaining = secondsLeft(endsAt);
       setLeft((current) => (current === remaining ? current : remaining));
-      if (remaining === 0 && !finished.current && document.visibilityState === "visible") {
-        finished.current = true;
-        void beep();
+      if (remaining === 0 && !finished.current && !sounding.current && document.visibilityState === "visible") {
+        sounding.current = true;
+        void beep().then((played) => {
+          sounding.current = false;
+          if (played) {
+            finished.current = true;
+          }
+        });
       }
     }
 
