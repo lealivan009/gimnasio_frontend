@@ -408,8 +408,8 @@ a:hover {
 }
 
 .skeleton-cell {
-  aspect-ratio: 1;
-  border-radius: 12px;
+  height: 52px;
+  border-radius: 10px;
 }
 
 .skeleton-chart {
@@ -3145,6 +3145,14 @@ a.btn-ghost {
     min-height: 36px;
     padding: 2px;
     font-size: 12px;
+  }
+
+  .skeleton-cell {
+    height: 36px;
+  }
+
+  .skeleton-calendar {
+    gap: 4px;
   }
 
   .heat-weekdays,

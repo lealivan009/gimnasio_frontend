@@ -898,7 +898,7 @@ function TrainingDay({
         </>
       ) : choosingDay ? null : (
         <div className="stack">
-          {selectedSessions.length === 0 ? (
+          {selectedSessions.length === 0 && !blockedReason ? (
             <p className="lede">Todavía no hay ejercicios cargados.</p>
           ) : null}
           {selectedSessions.map(([number, session]) => (
