@@ -25,33 +25,38 @@ export function StudentsFollowPage() {
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [openNow, setOpenNow] = useState(false);
+  const [todayClosure, setTodayClosure] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState<(typeof PAGE_SIZES)[number]>(10);
 
   async function load() {
-    const [data, present, occupancy] = await Promise.all([
+    const [data, present, occupancy, closures] = await Promise.all([
       api.listStudentFollow(),
       api.listInside(),
       api.getOccupancy(),
+      api.listClosures(),
     ]);
     setStudents(data);
     setInside(present);
     setOpenNow(occupancy.openNow);
+    setTodayClosure(closures.find((item) => item.date === todayIso())?.reason ?? null);
   }
 
   useEffect(() => {
     let cancelled = false;
     async function run() {
       try {
-        const [data, present, occupancy] = await Promise.all([
+        const [data, present, occupancy, closures] = await Promise.all([
           api.listStudentFollow(),
           api.listInside(),
           api.getOccupancy(),
+          api.listClosures(),
         ]);
         if (!cancelled) {
           setStudents(data);
           setInside(present);
           setOpenNow(occupancy.openNow);
+          setTodayClosure(closures.find((item) => item.date === todayIso())?.reason ?? null);
         }
       } catch (err) {
         if (!cancelled) {
@@ -115,6 +120,7 @@ export function StudentsFollowPage() {
         <Toast message={notice} onClose={() => setNotice(null)} />
       </section>
       <section className="session-card table-card">
+        {todayClosure ? <p className="alert">Hoy está bloqueado: {todayClosure}</p> : null}
         {error ? <p className="alert">{error}</p> : null}
         {loading ? (
           <p className="lede">Cargando…</p>
@@ -178,6 +184,8 @@ export function StudentsFollowPage() {
                     <td className="actions">
                       {presentToday ? (
                         <span className="pill on">Presente</span>
+                      ) : todayClosure ? (
+                        <span className="pill off">Bloqueado</span>
                       ) : openNow ? (
                         <button
                           type="button"

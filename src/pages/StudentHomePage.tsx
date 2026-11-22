@@ -22,6 +22,7 @@ import {
   type OpeningHour,
   type OperatingMode,
   type RoutineExercise,
+  type ClosedDay,
   type WorkoutLog,
 } from "../api/gym";
 import { ExerciseHowTo } from "../components/ExerciseHowTo";
@@ -109,6 +110,7 @@ export function StudentHomePage() {
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [calendarDays, setCalendarDays] = useState<CalendarDay[]>([]);
+  const [closures, setClosures] = useState<ClosedDay[]>([]);
   const [monthLogs, setMonthLogs] = useState<WorkoutLog[]>([]);
   const [selectedDate, setSelectedDate] = useState<string | null>(today);
   const [choosingDay, setChoosingDay] = useState(false);
@@ -120,7 +122,7 @@ export function StudentHomePage() {
   async function reload() {
     const config = await api.getGymConfig();
     const acceptsClasses = config.operatingMode !== "FREE_ACCESS";
-    const [nextActive, nextLogs, nextAttendance, nextClasses, nextBookings, nextDays, nextMonthLogs] =
+    const [nextActive, nextLogs, nextAttendance, nextClasses, nextBookings, nextDays, nextMonthLogs, nextClosures] =
       await Promise.all([
         api.getActiveRoutine(),
         api.listWorkouts({ from: logDate, to: logDate }),
@@ -129,6 +131,7 @@ export function StudentHomePage() {
         acceptsClasses ? api.listBookings({ date: today }) : Promise.resolve([]),
         api.calendar(year, month),
         api.listWorkouts({ from: monthStart(year, month), to: monthEnd(year, month) }),
+        api.listClosures(),
       ]);
     setMode(config.operatingMode);
     setHours(config.hours ?? []);
@@ -141,6 +144,7 @@ export function StudentHomePage() {
     setBookings(nextBookings);
     setCalendarDays(nextDays);
     setMonthLogs(nextMonthLogs);
+    setClosures(nextClosures);
   }
 
   useEffect(() => {
@@ -250,13 +254,18 @@ export function StudentHomePage() {
   }
 
   const weekday = DAY_LABELS[weekdayIndex()];
+  const closureReason = (date: string) => closures.find((item) => item.date === date)?.reason ?? null;
+  const todayClosure = closureReason(today);
+  const selectedClosure = closureReason(logDate);
   const closedToday =
     hours != null && hours.length > 0 && !hours.some((hour) => hour.dayOfWeek === weekdayIndex());
-  const presentLabel = closedToday && !attendance
-    ? "Hoy no abre"
-    : attendance?.checkInTime
-      ? "Presente"
-      : "Todavía no la marcaste";
+  const presentLabel = todayClosure && !attendance
+    ? "Bloqueado"
+    : closedToday && !attendance
+      ? "Hoy no abre"
+      : attendance?.checkInTime
+        ? "Presente"
+        : "Todavía no la marcaste";
 
   return (
     <div className="gym-home">
@@ -275,6 +284,8 @@ export function StudentHomePage() {
         <Toast message={notice} onClose={() => setNotice(null)} />
         {loading ? (
           <span className="skeleton skeleton-button" />
+        ) : todayClosure && !attendance ? (
+          <p className="alert">Hoy está bloqueado: {todayClosure}</p>
         ) : attendance || closedToday ? null : (
           <div className="home-attendance">
             <div className="form-actions">
@@ -302,7 +313,9 @@ export function StudentHomePage() {
       {mode !== "FREE_ACCESS" ? (
         <section className="session-card">
           <h2>Turnos de hoy</h2>
-          {classes.length === 0 ? (
+          {todayClosure ? (
+            <p className="alert">Hoy está bloqueado: {todayClosure}</p>
+          ) : classes.length === 0 ? (
             <p className="lede">No hay turnos para hoy.</p>
           ) : (
             <div className="stack">
@@ -393,7 +406,8 @@ export function StudentHomePage() {
           }}
           selectedDate={selectedDate}
           onSelect={(date) => {
-            if (date > today) {
+            const blocked = Boolean(closureReason(date));
+            if (date > today && !blocked) {
               return;
             }
             setSelectedDate(date);
@@ -406,13 +420,15 @@ export function StudentHomePage() {
           maxDate={today}
         />
         <p className="hint left">
-          {selectedDate && selectedDate > today
-            ? "Ese día todavía no llegó."
-            : selectedDate && selectedDate < oldestLogDate
-              ? "Ese día queda afuera de los 7 días. Podés verlo, pero no cargarlo."
-              : "Tocá un día para marcarlo. El presente y el entrenamiento se pueden cargar hasta 7 días hacia atrás."}
+          {selectedClosure
+            ? `Este día está bloqueado: ${selectedClosure}`
+            : selectedDate && selectedDate > today
+              ? "Ese día todavía no llegó."
+              : selectedDate && selectedDate < oldestLogDate
+                ? "Ese día queda afuera de los 7 días. Podés verlo, pero no cargarlo."
+                : "Tocá un día para marcarlo. El presente y el entrenamiento se pueden cargar hasta 7 días hacia atrás."}
         </p>
-        {logDate < today && logDate >= oldestLogDate && !presentDates.includes(logDate) ? (
+        {selectedClosure ? null : logDate < today && logDate >= oldestLogDate && !presentDates.includes(logDate) ? (
           dayClosed(logDate, hours) ? (
             <p className="lede">Ese día el gimnasio está cerrado.</p>
           ) : (
@@ -476,6 +492,7 @@ export function StudentHomePage() {
             onDeleteSet={onDeleteSet}
             logDate={logDate}
             present={presentDates.includes(logDate)}
+            blockedReason={selectedClosure}
           />
         ) : null}
       </section>
@@ -615,6 +632,7 @@ function TrainingDay({
   onDeleteSet,
   logDate,
   present,
+  blockedReason,
 }: {
   routineExercises: RoutineExercise[];
   logs: WorkoutLog[];
@@ -640,6 +658,7 @@ function TrainingDay({
   onDeleteSet: (log: WorkoutLog) => Promise<void>;
   logDate: string;
   present: boolean;
+  blockedReason: string | null;
 }) {
   const [pendingSet, setPendingSet] = useState<WorkoutLog | null>(null);
   const days = routineDays(routineExercises);
@@ -655,7 +674,7 @@ function TrainingDay({
     sessions.set(number, current);
   }
   const selectedSessions = [...sessions.entries()].sort((a, b) => a[0] - b[0]);
-  const canLoad = present && logDate <= today && logDate >= shiftIso(today, -7);
+  const canLoad = !blockedReason && present && logDate <= today && logDate >= shiftIso(today, -7);
   const editing = choosingDay || loggingDay != null;
 
   return (
@@ -683,6 +702,7 @@ function TrainingDay({
           void onDeleteSet(pendingSet).then(() => setPendingSet(null));
         }}
       />
+      {blockedReason ? <p className="alert">Este día está bloqueado: {blockedReason}</p> : null}
       {canLoad || selectedSessions.length > 0 ? (
         <div className="load-day">
           <p>{selectedDate ? formatDate(selectedDate) : ""}</p>
@@ -705,7 +725,7 @@ function TrainingDay({
         </div>
       ) : null}
 
-      {openDay && present ? (
+      {openDay && present && !blockedReason ? (
         <>
           <h3 className="training-day-title">{sessionName(days, openDay.dayNumber)}</h3>
           <p className="hint left">

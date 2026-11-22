@@ -186,6 +186,7 @@ export function StudentCalendarPage() {
   }
   const went = visits.length > 0;
   const trained = logs.length > 0;
+  const blockedReason = days.find((day) => day.date === selectedDate)?.closedReason;
 
   return (
     <section className="session-card">
@@ -213,6 +214,7 @@ export function StudentCalendarPage() {
             onSelect={setSelectedDate}
           />
           <p className="hint left">Tocá un día para ver si fue y qué hizo. Desde acá no se marca la asistencia.</p>
+          {blockedReason ? <p className="alert">Este día está bloqueado: {blockedReason}</p> : null}
           <div className="day-work">
             <div className="day-work-head">
               <h3>{formatDate(selectedDate)}</h3>

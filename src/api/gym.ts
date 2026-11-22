@@ -301,6 +301,15 @@ export interface CalendarDay {
   trained: boolean;
   sets: number;
   sessions: CalendarSession[];
+  closed?: boolean;
+  closedReason?: string | null;
+}
+
+export interface ClosedDay {
+  id: string;
+  date: string;
+  reason: string;
+  createdByName: string;
 }
 
 export interface RoutineDayGroup {

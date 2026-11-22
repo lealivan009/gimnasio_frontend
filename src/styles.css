@@ -2975,6 +2975,11 @@ a.btn-ghost {
   background: linear-gradient(135deg, rgba(61, 111, 140, 0.45), rgba(61, 143, 110, 0.45));
 }
 
+.heat-cell.blocked {
+  background: rgba(255, 138, 122, 0.22);
+  color: #ffb4aa;
+}
+
 .heat-cell.is-future {
   opacity: 0.38;
 }

@@ -40,6 +40,7 @@ export function AppShell() {
             </>
           ) : null}
           {isAdmin ? <NavLink to="/app/users">Usuarios</NavLink> : null}
+          {staff ? <NavLink to="/admin/feriados">Feriados</NavLink> : null}
           {staff ? <NavLink to="/admin/horarios">Plataforma</NavLink> : null}
           {isAdmin ? (
             <NavLink to="/app/settings" title="Configuración del sistema">

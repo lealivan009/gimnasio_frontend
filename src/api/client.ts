@@ -4,6 +4,7 @@ import type {
   Attendance,
   Booking,
   CalendarDay,
+  ClosedDay,
   ClassSchedule,
   ClassScheduleInput,
   Exercise,
@@ -482,6 +483,18 @@ export class ApiClient {
   exerciseProgress(exerciseId: string, studentId?: string) {
     const qs = studentId ? `?studentId=${encodeURIComponent(studentId)}` : "";
     return this.request<ProgressPoint[]>(`/api/estadisticas/ejercicio/${exerciseId}${qs}`);
+  }
+
+  listClosures() {
+    return this.request<ClosedDay[]>("/api/cierres");
+  }
+
+  createClosure(date: string, reason: string) {
+    return this.request<ClosedDay>("/api/cierres", { method: "POST", body: { date, reason } });
+  }
+
+  deleteClosure(id: string) {
+    return this.request<{ message: string }>(`/api/cierres/${encodeURIComponent(id)}`, { method: "DELETE" });
   }
 
   calendar(year: number, month: number, studentId?: string) {

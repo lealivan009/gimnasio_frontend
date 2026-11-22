@@ -12,6 +12,7 @@ import { ExerciseFormPage } from "./pages/ExerciseFormPage";
 import { ExerciseViewPage } from "./pages/ExerciseViewPage";
 import { ExercisesPage } from "./pages/ExercisesPage";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
+import { HolidaysPage } from "./pages/HolidaysPage";
 import { HomePage } from "./pages/HomePage";
 import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
@@ -71,6 +72,7 @@ export function App() {
             <Route path="/admin/rutinas/:id" element={<StaffRoutineViewPage />} />
             <Route path="/admin/rutinas/:id/editar" element={<StaffRoutineFormPage />} />
             <Route path="/admin/horarios" element={<SchedulesPage />} />
+            <Route path="/admin/feriados" element={<HolidaysPage />} />
             <Route path="/admin/alumnos" element={<StudentsFollowPage />} />
             <Route path="/admin/alumnos/:id" element={<StudentCalendarPage />} />
             <Route path="/admin/pendientes" element={<PendingAccountsPage />} />

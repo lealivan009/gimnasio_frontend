@@ -64,21 +64,34 @@ export function MonthCalendar({
           <span key={`empty-${index}`} />
         ))}
         {days.map((day) => {
-          const tone = day.attended && day.trained ? "both" : day.attended ? "attended" : day.trained ? "trained" : "";
+          const tone = day.closed
+            ? "blocked"
+            : day.attended && day.trained
+              ? "both"
+              : day.attended
+                ? "attended"
+                : day.trained
+                  ? "trained"
+                  : "";
           const future = maxDate != null && day.date > maxDate;
-          const label = (day.sessions ?? []).map((session) => session.label).join(" · ");
+          const label = day.closed ? "Cerrado" : (day.sessions ?? []).map((session) => session.label).join(" · ");
+          const title = day.closed
+            ? `Bloqueado: ${day.closedReason}`
+            : future
+              ? "Todavía no llegó"
+              : label || day.date;
           const content = (
             <>
               <span>{Number(day.date.slice(8))}</span>
               {label ? <small className="heat-label">{label}</small> : null}
             </>
           );
-          if (!onSelect || future) {
+          if (!onSelect || (future && !day.closed)) {
             return (
               <span
                 key={day.date}
-                className={`heat-cell ${tone}${future ? " is-future" : ""}`}
-                title={future ? "Todavía no llegó" : label || day.date}
+                className={`heat-cell ${tone}${future && !day.closed ? " is-future" : ""}`}
+                title={title}
               >
                 {content}
               </span>
@@ -89,7 +102,7 @@ export function MonthCalendar({
               key={day.date}
               type="button"
               className={`heat-cell pick ${tone} ${selectedDate === day.date ? "selected" : ""}`}
-              title={label || day.date}
+              title={title}
               onClick={() => onSelect(day.date)}
             >
               {content}
@@ -102,6 +115,7 @@ export function MonthCalendar({
           <span className="heat-cell attended mini" /> Asistió
           <span className="heat-cell trained mini" /> Entrenó
           <span className="heat-cell both mini" /> Las dos
+          <span className="heat-cell blocked mini" /> Bloqueado
         </p>
       ) : null}
     </>
