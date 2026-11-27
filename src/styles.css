@@ -2709,8 +2709,8 @@ a.btn-ghost {
   font-variant-numeric: tabular-nums;
 }
 
-.rest-modal-time.done {
-  color: var(--accent);
+.rest-modal-time.over {
+  color: var(--danger);
 }
 
 .rest-modal-name {

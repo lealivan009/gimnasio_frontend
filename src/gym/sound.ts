@@ -198,10 +198,3 @@ export async function beep() {
   }
 }
 
-if (typeof window !== "undefined") {
-  const prime = () => {
-    unlockSound();
-    window.removeEventListener("pointerdown", prime);
-  };
-  window.addEventListener("pointerdown", prime);
-}

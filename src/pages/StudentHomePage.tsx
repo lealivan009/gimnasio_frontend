@@ -31,7 +31,6 @@ import { MonthCalendar } from "../components/MonthCalendar";
 import { SkeletonCalendar } from "../components/Skeleton";
 import { Toast } from "../components/Toast";
 import { weekdayIndex } from "../gym/hours";
-import { beep, unlockSound } from "../gym/sound";
 
 function clampTime(raw: string, max: number) {
   const digits = raw.replace(/\D/g, "");
@@ -193,7 +192,6 @@ export function StudentHomePage() {
     durationSeconds = 0
   ) {
     event.preventDefault();
-    unlockSound();
     void holdScreen();
     const hadRest = rest != null;
     let started = false;
@@ -508,11 +506,17 @@ export function StudentHomePage() {
 }
 
 function secondsLeft(endsAt: number, now = Date.now()) {
-  return Math.max(0, Math.ceil((endsAt - now) / 1000));
+  const delta = endsAt - now;
+  if (delta >= 0) {
+    return Math.ceil(delta / 1000);
+  }
+  return -Math.floor((now - endsAt) / 1000);
 }
 
 function formatClock(totalSeconds: number) {
-  return `${Math.floor(totalSeconds / 60)}:${String(totalSeconds % 60).padStart(2, "0")}`;
+  const sign = totalSeconds < 0 ? "-" : "";
+  const absolute = Math.abs(totalSeconds);
+  return `${sign}${Math.floor(absolute / 60)}:${String(absolute % 60).padStart(2, "0")}`;
 }
 
 function RestModal({
@@ -527,22 +531,11 @@ function RestModal({
   onHold: () => void;
 }) {
   const [left, setLeft] = useState(() => secondsLeft(endsAt));
-  const finished = useRef(false);
-  const sounding = useRef(false);
 
   useEffect(() => {
     function tick() {
       const remaining = secondsLeft(endsAt);
       setLeft((current) => (current === remaining ? current : remaining));
-      if (remaining === 0 && !finished.current && !sounding.current && document.visibilityState === "visible") {
-        sounding.current = true;
-        void beep().then((played) => {
-          sounding.current = false;
-          if (played) {
-            finished.current = true;
-          }
-        });
-      }
     }
 
     function onVisible() {
@@ -579,16 +572,16 @@ function RestModal({
     };
   }, [onSkip]);
 
-  const done = left === 0;
+  const over = left <= 0;
 
   return createPortal(
     <div className="rest-modal">
       <div className="rest-modal-backdrop" />
       <div className="rest-modal-card" role="dialog" aria-modal="true" aria-labelledby="rest-title">
         <p className="eyebrow" id="rest-title">
-          {done ? "Listo" : "Descanso"}
+          {left < 0 ? "De más" : over ? "Listo" : "Descanso"}
         </p>
-        <p className={done ? "rest-modal-time done" : "rest-modal-time"} aria-live="polite">
+        <p className={over ? "rest-modal-time over" : "rest-modal-time"} aria-live="polite">
           {formatClock(left)}
         </p>
         <p className="rest-modal-name">{name}</p>
